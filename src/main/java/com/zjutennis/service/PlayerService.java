@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,11 +39,6 @@ public class PlayerService {
         return playerRepository.findByEmail(email);
     }
 
-    public List<Player> getPlayersByGraduationYear(Integer graduationYear) {
-        log.debug("Fetching players by graduation year: {}", graduationYear);
-        return playerRepository.findByGraduationYear(graduationYear);
-    }
-
     public List<Player> getPlayersByCity(String city) {
         log.debug("Fetching players by city: {}", city);
         return playerRepository.findByCity(city);
@@ -63,8 +59,6 @@ public class PlayerService {
         // Update basic info
         player.setName(playerDetails.getName());
         player.setEmail(playerDetails.getEmail());
-        player.setGraduationYear(playerDetails.getGraduationYear());
-        player.setMajor(playerDetails.getMajor());
         player.setCity(playerDetails.getCity());
         player.setCountry(playerDetails.getCountry());
         player.setPhoneNumber(playerDetails.getPhoneNumber());
@@ -77,7 +71,28 @@ public class PlayerService {
 
         // Update statistics if provided
         if (playerDetails.getStatistics() != null) {
-            player.setStatistics(playerDetails.getStatistics());
+            PlayerStatistics newStats = playerDetails.getStatistics();
+            PlayerStatistics existingStats = player.getStatistics();
+
+            // Check if UTR rating has changed and update the date accordingly
+            if (existingStats != null && newStats.getUtrRating() != null) {
+                Double oldUtr = existingStats.getUtrRating();
+                Double newUtr = newStats.getUtrRating();
+
+                if (oldUtr == null || !oldUtr.equals(newUtr)) {
+                    newStats.setUtrUpdatedDate(LocalDateTime.now());
+                }
+            } else if (newStats.getUtrRating() != null) {
+                // First time setting UTR rating
+                newStats.setUtrUpdatedDate(LocalDateTime.now());
+            }
+
+            player.setStatistics(newStats);
+        }
+
+        // Update alumni if provided
+        if (playerDetails.getAlumni() != null) {
+            player.setAlumni(playerDetails.getAlumni());
         }
 
         return playerRepository.save(player);
@@ -144,7 +159,15 @@ public class PlayerService {
 
                 String utrRating = row.get("UTR Rating");
                 if (utrRating != null && !utrRating.trim().isEmpty() && !utrRating.equals("-")) {
-                    statistics.setUtrRating(Double.parseDouble(utrRating.trim()));
+                    Double oldUtr = statistics.getUtrRating();
+                    Double newUtr = Double.parseDouble(utrRating.trim());
+
+                    // Update UTR updated date if rating changed
+                    if (oldUtr == null || !oldUtr.equals(newUtr)) {
+                        statistics.setUtrUpdatedDate(LocalDateTime.now());
+                    }
+
+                    statistics.setUtrRating(newUtr);
                     statsUpdated = true;
                 }
 

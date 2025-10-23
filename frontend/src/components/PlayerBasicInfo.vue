@@ -23,26 +23,6 @@
       </div>
 
       <div class="space-y-2">
-        <Label for="graduationYear">Graduation Year</Label>
-        <Input
-          id="graduationYear"
-          v-model.number="localPlayer.graduationYear"
-          type="number"
-          placeholder="2023"
-        />
-      </div>
-
-      <div class="space-y-2">
-        <Label for="major">Major</Label>
-        <Input
-          id="major"
-          v-model="localPlayer.major"
-          type="text"
-          placeholder="Computer Science"
-        />
-      </div>
-
-      <div class="space-y-2">
         <Label for="city">City</Label>
         <Input
           id="city"

@@ -25,12 +25,6 @@ public class Player {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "graduation_year")
-    private Integer graduationYear;
-
-    @Column(name = "major")
-    private String major;
-
     @Column(name = "city")
     private String city;
 
@@ -50,6 +44,10 @@ public class Player {
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference("player-statistics")
     private PlayerStatistics statistics;
+
+    @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference("player-alumni")
+    private PlayerAlumni alumni;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -71,6 +69,13 @@ public class Player {
         this.statistics = statistics;
         if (statistics != null) {
             statistics.setPlayer(this);
+        }
+    }
+
+    public void setAlumni(PlayerAlumni alumni) {
+        this.alumni = alumni;
+        if (alumni != null) {
+            alumni.setPlayer(this);
         }
     }
 }

@@ -13,7 +13,5 @@ public interface PlayerRepository extends JpaRepository<Player, Long>, JpaSpecif
 
     Optional<Player> findByEmail(String email);
 
-    List<Player> findByGraduationYear(Integer graduationYear);
-
     List<Player> findByCity(String city);
 }

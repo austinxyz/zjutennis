@@ -50,6 +50,12 @@
             @update:player="player = $event"
           />
 
+          <PlayerAlumni
+            v-if="activeTab === 'alumni'"
+            :alumni="alumni"
+            @update:alumni="alumni = $event"
+          />
+
           <PlayerSkills
             v-if="activeTab === 'skills'"
             :skills="skills"
@@ -92,6 +98,7 @@ import { ArrowLeft, Save } from 'lucide-vue-next';
 import PlayerBasicInfo from '../components/PlayerBasicInfo.vue';
 import PlayerSkills from '../components/PlayerSkills.vue';
 import PlayerStatistics from '../components/PlayerStatistics.vue';
+import PlayerAlumni from '../components/PlayerAlumni.vue';
 import playerService from '../services/playerService';
 import Button from '../components/ui/Button.vue';
 import Card from '../components/ui/Card.vue';
@@ -107,8 +114,6 @@ const error = ref(null);
 const player = ref({
   name: '',
   email: '',
-  graduationYear: null,
-  major: '',
   city: '',
   country: '',
   phoneNumber: '',
@@ -138,6 +143,7 @@ const statistics = ref({
   utrRating: null,
   utrStatus: '',
   utrUrl: '',
+  utrUpdatedDate: null,
   ntrpRating: null,
   ntrpStatus: '',
   ntrpUrl: '',
@@ -168,11 +174,28 @@ const statistics = ref({
   goals: ''
 });
 
+const alumni = ref({
+  graduationUniversity1: '',
+  graduationYear1: null,
+  graduationUniversity2: '',
+  graduationYear2: null,
+  graduationUniversity3: '',
+  graduationYear3: null,
+  coupleGraduationUniversity1: '',
+  coupleGraduationYear1: null,
+  coupleGraduationUniversity2: '',
+  coupleGraduationYear2: null,
+  coupleGraduationUniversity3: '',
+  coupleGraduationYear3: null
+});
+
 const skillsExist = ref(false);
 const statisticsExist = ref(false);
+const alumniExist = ref(false);
 
 const tabs = [
   { id: 'basic', label: 'Basic Information' },
+  { id: 'alumni', label: 'Alumni Information' },
   { id: 'skills', label: 'Skills' },
   { id: 'statistics', label: 'Statistics' }
 ];
@@ -206,6 +229,13 @@ const loadPlayer = async () => {
       statisticsExist.value = false;
     }
 
+    if (playerData.alumni) {
+      alumni.value = playerData.alumni;
+      alumniExist.value = true;
+    } else {
+      alumniExist.value = false;
+    }
+
   } catch (err) {
     error.value = 'Failed to load player: ' + err.message;
   } finally {
@@ -224,16 +254,26 @@ const savePlayer = async () => {
         : null,
       statistics: statistics.value && Object.values(statistics.value).some(v => v !== null && v !== '')
         ? statistics.value
+        : null,
+      alumni: alumni.value && Object.values(alumni.value).some(v => v !== null && v !== '')
+        ? alumni.value
         : null
     };
 
     if (isNewPlayer.value) {
-      await playerService.createPlayer(playerToSave);
+      const savedPlayer = await playerService.createPlayer(playerToSave);
+      // Update the route to the new player's ID without redirecting to list
+      router.replace(`/players/${savedPlayer.id}`);
+      // Reload the player data to get the saved version
+      await loadPlayer();
     } else {
       await playerService.updatePlayer(playerToSave.id, playerToSave);
+      // Reload the player data to get the updated version (including utr_updated_date)
+      await loadPlayer();
     }
 
-    router.push('/players');
+    // Show success message
+    alert('Player saved successfully!');
   } catch (err) {
     alert('Failed to save player: ' + err.message);
   } finally {

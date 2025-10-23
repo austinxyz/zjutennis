@@ -44,13 +44,6 @@ public class PlayerController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/graduation-year/{year}")
-    public ResponseEntity<List<Player>> getPlayersByGraduationYear(@PathVariable Integer year) {
-        log.info("GET /api/players/graduation-year/{} - Fetching players by graduation year", year);
-        List<Player> players = playerService.getPlayersByGraduationYear(year);
-        return ResponseEntity.ok(players);
-    }
-
     @GetMapping("/city/{city}")
     public ResponseEntity<List<Player>> getPlayersByCity(@PathVariable String city) {
         log.info("GET /api/players/city/{} - Fetching players by city", city);

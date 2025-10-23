@@ -37,6 +37,9 @@ public class PlayerStatistics {
     @Column(name = "utr_url", length = 500)
     private String utrUrl;
 
+    @Column(name = "utr_updated_date")
+    private LocalDateTime utrUpdatedDate;
+
     @Column(name = "ntrp_rating")
     private Double ntrpRating;
 

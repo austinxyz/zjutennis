@@ -37,6 +37,17 @@
           />
         </div>
         <div class="space-y-2">
+          <Label for="utrUpdatedDate">UTR Last Updated</Label>
+          <Input
+            id="utrUpdatedDate"
+            :value="formatDate(localStats.utrUpdatedDate)"
+            type="text"
+            disabled
+            placeholder="Not set"
+            class="bg-muted"
+          />
+        </div>
+        <div class="space-y-2">
           <Label for="ntrpRating">NTRP Rating</Label>
           <Input
             id="ntrpRating"
@@ -400,6 +411,20 @@ const props = defineProps({
 const emit = defineEmits(['update:statistics']);
 
 const localStats = ref({ ...props.statistics });
+
+// Format date to readable string (date only, no time)
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
 
 watch(localStats, (newValue) => {
   emit('update:statistics', newValue);
