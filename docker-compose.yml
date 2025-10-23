@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Backend Spring Boot service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zjutennis-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - .env
+    networks:
+      - zjutennis-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/api/players"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Frontend Vue.js service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: zjutennis-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - zjutennis-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  zjutennis-network:
+    driver: bridge

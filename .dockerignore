@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Environment files
+.env
+.env.example
+
+# IDE
+.idea
+*.iml
+.vscode
+
+# Build outputs
+target/
+build/
+dist/
+
+# Frontend
+frontend/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+docs/
+
+# Database migrations (already in container)
+db/
+
+# Test files
+src/test/
