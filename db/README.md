@@ -39,12 +39,39 @@ mysql -h 10.0.0.7 -P 37719 -u austinxu -phelloworld zjualumni < db/db_migration_
 
 ---
 
+### 3. remove_duplicate_fields_from_players.sql
+**Date:** 2025-10-22
+**Purpose:** Remove duplicate UTR rating and status fields from players table
+
+**Changes:**
+- Removes `utr_rating` column from `players` table
+- Removes `status` column from `players` table
+- These fields are now only maintained in `player_statistics` table
+- Reduces data duplication and ensures single source of truth
+
+**How to run:**
+```bash
+mysql -h 10.0.0.7 -P 37719 -u austinxu -phelloworld zjualumni < db/remove_duplicate_fields_from_players.sql
+```
+
+**Prerequisites:**
+- Ensure `player_statistics` table exists and contains all UTR data
+- Run this AFTER `create_skill_tables.sql`
+
+---
+
 ## Migration Order
 
 **IMPORTANT:** Run migrations in this order:
 
-1. `db_migration_add_utr_updated_date.sql`
-2. `db_migration_add_player_alumni.sql`
+1. `setup_database.sql` (initial setup)
+2. `create_skill_tables.sql` (creates player_skills and player_statistics tables)
+3. `add_gender_field.sql`
+4. `add_rating_status_fields.sql`
+5. `add_statistics_url_fields.sql`
+6. `remove_duplicate_fields_from_players.sql`
+7. `db_migration_add_utr_updated_date.sql`
+8. `db_migration_add_player_alumni.sql`
 
 ## Database Connection
 

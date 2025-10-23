@@ -192,14 +192,15 @@ All database migration scripts are located in the `db/` folder with comprehensiv
 
 ```bash
 db/
-├── README.md                               # Complete migration documentation
-├── setup_database.sql                      # Initial database and tables setup
-├── create_skill_tables.sql                 # Player skills and statistics tables
-├── add_gender_field.sql                    # Add gender field to players
-├── add_rating_status_fields.sql            # Add UTR/NTRP status fields
-├── add_statistics_url_fields.sql           # Add URL fields for ratings
-├── db_migration_add_utr_updated_date.sql   # Add UTR update tracking
-└── db_migration_add_player_alumni.sql      # Add alumni information table
+├── README.md                                    # Complete migration documentation
+├── setup_database.sql                           # Initial database and tables setup
+├── create_skill_tables.sql                      # Player skills and statistics tables
+├── add_gender_field.sql                         # Add gender field to players
+├── add_rating_status_fields.sql                 # Add UTR/NTRP status fields
+├── add_statistics_url_fields.sql                # Add URL fields for ratings
+├── remove_duplicate_fields_from_players.sql     # Remove duplicate UTR fields
+├── db_migration_add_utr_updated_date.sql        # Add UTR update tracking
+└── db_migration_add_player_alumni.sql           # Add alumni information table
 ```
 
 To run migrations, see the detailed instructions in `db/README.md`. Migration order is important - follow the documentation carefully.
