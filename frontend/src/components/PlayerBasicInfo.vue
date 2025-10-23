@@ -1,75 +1,83 @@
 <template>
   <div class="space-y-6">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Name *</label>
-        <input
+      <div class="space-y-2">
+        <Label for="name">Name *</Label>
+        <Input
+          id="name"
           v-model="localPlayer.name"
           type="text"
           required
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          placeholder="Enter player name"
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Email</label>
-        <input
+      <div class="space-y-2">
+        <Label for="email">Email</Label>
+        <Input
+          id="email"
           v-model="localPlayer.email"
           type="email"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          placeholder="player@example.com"
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Graduation Year</label>
-        <input
+      <div class="space-y-2">
+        <Label for="graduationYear">Graduation Year</Label>
+        <Input
+          id="graduationYear"
           v-model.number="localPlayer.graduationYear"
           type="number"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          placeholder="2023"
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Major</label>
-        <input
+      <div class="space-y-2">
+        <Label for="major">Major</Label>
+        <Input
+          id="major"
           v-model="localPlayer.major"
           type="text"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          placeholder="Computer Science"
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">City</label>
-        <input
+      <div class="space-y-2">
+        <Label for="city">City</Label>
+        <Input
+          id="city"
           v-model="localPlayer.city"
           type="text"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          placeholder="San Francisco"
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Country</label>
-        <input
+      <div class="space-y-2">
+        <Label for="country">Country</Label>
+        <Input
+          id="country"
           v-model="localPlayer.country"
           type="text"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          placeholder="USA"
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Phone Number</label>
-        <input
+      <div class="space-y-2">
+        <Label for="phoneNumber">Phone Number</Label>
+        <Input
+          id="phoneNumber"
           v-model="localPlayer.phoneNumber"
           type="tel"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          placeholder="+1 234 567 8900"
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Gender</label>
+      <div class="space-y-2">
+        <Label for="gender">Gender</Label>
         <select
+          id="gender"
           v-model="localPlayer.gender"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option value="">Select gender</option>
           <option value="male">Male</option>
@@ -83,6 +91,8 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import Input from './ui/Input.vue';
+import Label from './ui/Label.vue';
 
 const props = defineProps({
   player: {

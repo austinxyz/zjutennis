@@ -4,12 +4,13 @@
       <h1 class="text-3xl font-bold text-foreground">
         {{ isNewPlayer ? 'Add New Player' : 'Edit Player' }}
       </h1>
-      <button
+      <Button
         @click="goBack"
-        class="px-4 py-2 border border-input rounded-md hover:bg-accent text-foreground"
+        variant="outline"
       >
+        <ArrowLeft class="mr-2 h-4 w-4" />
         Back to List
-      </button>
+      </Button>
     </div>
 
     <div v-if="loading" class="text-center py-8">
@@ -20,7 +21,7 @@
       <p class="text-destructive">{{ error }}</p>
     </div>
 
-    <div v-else class="bg-card rounded-lg shadow-lg">
+    <Card v-else>
       <!-- Tabs -->
       <div class="border-b border-border">
         <nav class="flex -mb-px">
@@ -63,34 +64,37 @@
 
           <!-- Action Buttons -->
           <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-border">
-            <button
+            <Button
               type="button"
               @click="goBack"
-              class="px-6 py-2 border border-input rounded-md hover:bg-accent text-foreground"
+              variant="outline"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               :disabled="saving"
-              class="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50"
             >
+              <Save class="mr-2 h-4 w-4" />
               {{ saving ? 'Saving...' : 'Save' }}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
-    </div>
+    </Card>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { ArrowLeft, Save } from 'lucide-vue-next';
 import PlayerBasicInfo from '../components/PlayerBasicInfo.vue';
 import PlayerSkills from '../components/PlayerSkills.vue';
 import PlayerStatistics from '../components/PlayerStatistics.vue';
 import playerService from '../services/playerService';
+import Button from '../components/ui/Button.vue';
+import Card from '../components/ui/Card.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -188,7 +192,6 @@ const loadPlayer = async () => {
     const playerData = await playerService.getPlayerById(playerId);
     player.value = playerData;
 
-    // Load skills from player entity
     if (playerData.skills) {
       skills.value = playerData.skills;
       skillsExist.value = true;
@@ -196,7 +199,6 @@ const loadPlayer = async () => {
       skillsExist.value = false;
     }
 
-    // Load statistics from player entity
     if (playerData.statistics) {
       statistics.value = playerData.statistics;
       statisticsExist.value = true;
@@ -215,7 +217,6 @@ const savePlayer = async () => {
   try {
     saving.value = true;
 
-    // Prepare player with nested skills and statistics
     const playerToSave = {
       ...player.value,
       skills: skills.value && Object.values(skills.value).some(v => v !== null && v !== '')

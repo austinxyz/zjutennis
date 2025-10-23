@@ -9,8 +9,10 @@ A full-stack web application for managing and analyzing ZJU alumni tennis player
 - **Statistics Tracking**: Monitor player ratings (UTR, NTRP, Dynamic Rating) and performance metrics
 - **Sortable Player List**: View and sort players by UTR, NTRP, or gender
 - **Tabbed Edit Interface**: Organized player data entry with separate tabs for basic info, skills, and statistics
-- **CSV Import**: Bulk import player data from CSV files
-- **Responsive Design**: Modern UI with Tailwind CSS and theme support
+- **CSV Import/Export**: Bulk import player data from CSV files and export selected players
+- **Modern UI**: Professional design with shadcn-vue component library
+- **Responsive Design**: Mobile-friendly interface with Tailwind CSS and theme support
+- **Accessible Components**: WCAG-compliant UI components built on Radix Vue primitives
 
 ## Technology Stack
 
@@ -27,6 +29,10 @@ A full-stack web application for managing and analyzing ZJU alumni tennis player
 - Vue Router 4
 - Axios
 - Tailwind CSS
+- shadcn-vue (UI Component Library)
+- Radix Vue (Headless UI Components)
+- Lucide Vue Next (Icons)
+- Class Variance Authority (Component Variants)
 - Vite
 
 ## Project Structure
@@ -65,6 +71,15 @@ zjutennis/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
+│   │   │   ├── ui/              # shadcn-vue UI components
+│   │   │   │   ├── Button.vue
+│   │   │   │   ├── Card.vue
+│   │   │   │   ├── Input.vue
+│   │   │   │   ├── Label.vue
+│   │   │   │   ├── Textarea.vue
+│   │   │   │   ├── Badge.vue
+│   │   │   │   ├── Table.vue
+│   │   │   │   └── ... (other UI components)
 │   │   │   ├── PlayerBasicInfo.vue
 │   │   │   ├── PlayerSkills.vue
 │   │   │   └── PlayerStatistics.vue
@@ -75,6 +90,8 @@ zjutennis/
 │   │   │   └── playerService.js
 │   │   ├── router/
 │   │   │   └── index.js
+│   │   ├── lib/
+│   │   │   └── utils.js         # Utility functions (cn helper)
 │   │   ├── App.vue
 │   │   └── main.js
 │   ├── index.html
@@ -146,6 +163,27 @@ CREATE DATABASE zjualumni;
 ```
 
 The application will auto-create tables on first run (`spring.jpa.hibernate.ddl-auto=none` is set, but entities are configured with proper JPA annotations).
+
+### UI Components
+
+The frontend uses **shadcn-vue**, a modern component library that provides:
+
+- **Customizable Components**: Built on top of Radix Vue primitives for full control
+- **Accessible by Default**: WCAG-compliant components with proper ARIA attributes
+- **Beautiful Design**: Professional styling with Tailwind CSS
+- **Type-safe**: Written in TypeScript-compatible patterns
+- **Icon System**: Lucide Vue Next for consistent, modern icons
+
+**Key Components Used:**
+- `Button` - Multiple variants (default, outline, ghost, destructive)
+- `Card` - Container components with header, title, and content sections
+- `Table` - Fully-featured data tables with sorting capabilities
+- `Input` - Form inputs with consistent styling
+- `Label` - Accessible form labels
+- `Textarea` - Multi-line text inputs
+- `Badge` - Status and category indicators
+
+All components follow a consistent design system with proper spacing, typography, and color schemes.
 
 ### Backend Setup
 

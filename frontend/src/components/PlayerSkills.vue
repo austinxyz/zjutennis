@@ -10,77 +10,84 @@
         <h3 class="text-lg font-semibold text-foreground mb-4">Technical Skills</h3>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Forehand</label>
+      <div class="space-y-2">
+        <Label for="forehand">Forehand</Label>
         <select
+          id="forehand"
           v-model.number="localSkills.forehand"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select rating</option>
           <option v-for="rating in technicalRatings" :key="rating" :value="rating">{{ rating }}</option>
         </select>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Backhand</label>
+      <div class="space-y-2">
+        <Label for="backhand">Backhand</Label>
         <select
+          id="backhand"
           v-model.number="localSkills.backhand"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select rating</option>
           <option v-for="rating in technicalRatings" :key="rating" :value="rating">{{ rating }}</option>
         </select>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Baseline</label>
+      <div class="space-y-2">
+        <Label for="baseline">Baseline</Label>
         <select
+          id="baseline"
           v-model.number="localSkills.baseline"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select rating</option>
           <option v-for="rating in technicalRatings" :key="rating" :value="rating">{{ rating }}</option>
         </select>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Volley</label>
+      <div class="space-y-2">
+        <Label for="volley">Volley</Label>
         <select
+          id="volley"
           v-model.number="localSkills.volley"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select rating</option>
           <option v-for="rating in technicalRatings" :key="rating" :value="rating">{{ rating }}</option>
         </select>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Smash</label>
+      <div class="space-y-2">
+        <Label for="smash">Smash</Label>
         <select
+          id="smash"
           v-model.number="localSkills.smash"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select rating</option>
           <option v-for="rating in technicalRatings" :key="rating" :value="rating">{{ rating }}</option>
         </select>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Serve</label>
+      <div class="space-y-2">
+        <Label for="serve">Serve</Label>
         <select
+          id="serve"
           v-model.number="localSkills.serve"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select rating</option>
           <option v-for="rating in technicalRatings" :key="rating" :value="rating">{{ rating }}</option>
         </select>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Return Serve</label>
+      <div class="space-y-2">
+        <Label for="returnServe">Return Serve</Label>
         <select
+          id="returnServe"
           v-model.number="localSkills.returnServe"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select rating</option>
           <option v-for="rating in technicalRatings" :key="rating" :value="rating">{{ rating }}</option>
@@ -92,11 +99,12 @@
         <h3 class="text-lg font-semibold text-foreground mb-4">Mental & Physical</h3>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Mental</label>
+      <div class="space-y-2">
+        <Label for="mental">Mental</Label>
         <select
+          id="mental"
           v-model.number="localSkills.mental"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select mental level</option>
           <option :value="1">1 - Fragile</option>
@@ -106,11 +114,12 @@
         </select>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Movement</label>
+      <div class="space-y-2">
+        <Label for="movement">Movement</Label>
         <select
+          id="movement"
           v-model.number="localSkills.movement"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select movement level</option>
           <option :value="1">1 - Poor</option>
@@ -121,11 +130,12 @@
         </select>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Fitness</label>
+      <div class="space-y-2">
+        <Label for="fitness">Fitness</Label>
         <select
+          id="fitness"
           v-model.number="localSkills.fitness"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select fitness level</option>
           <option :value="1">1</option>
@@ -146,11 +156,12 @@
         <h3 class="text-lg font-semibold text-foreground mb-4">Strategy & Tactics</h3>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Court Positioning</label>
+      <div class="space-y-2">
+        <Label for="courtPositioning">Court Positioning</Label>
         <select
+          id="courtPositioning"
           v-model.number="localSkills.courtPositioning"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select level</option>
           <option :value="1">1 - Poor</option>
@@ -161,11 +172,12 @@
         </select>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Shot Selection</label>
+      <div class="space-y-2">
+        <Label for="shotSelection">Shot Selection</Label>
         <select
+          id="shotSelection"
           v-model.number="localSkills.shotSelection"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select level</option>
           <option :value="1">1 - Poor</option>
@@ -176,11 +188,12 @@
         </select>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Competitive Spirit</label>
+      <div class="space-y-2">
+        <Label for="competitiveSpirit">Competitive Spirit</Label>
         <select
+          id="competitiveSpirit"
           v-model.number="localSkills.competitiveSpirit"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option :value="null">Select level</option>
           <option :value="1">1 - Poor</option>
@@ -194,31 +207,34 @@
 
     <!-- Notes Section -->
     <div class="grid grid-cols-1 gap-6 mt-6">
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Strengths</label>
-        <textarea
+      <div class="space-y-2">
+        <Label for="strengths">Strengths</Label>
+        <Textarea
+          id="strengths"
           v-model="localSkills.strengths"
-          rows="3"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-        ></textarea>
+          :rows="3"
+          placeholder="Describe player strengths..."
+        />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Weaknesses</label>
-        <textarea
+      <div class="space-y-2">
+        <Label for="weaknesses">Weaknesses</Label>
+        <Textarea
+          id="weaknesses"
           v-model="localSkills.weaknesses"
-          rows="3"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-        ></textarea>
+          :rows="3"
+          placeholder="Describe areas for improvement..."
+        />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Notes</label>
-        <textarea
+      <div class="space-y-2">
+        <Label for="notes">Notes</Label>
+        <Textarea
+          id="notes"
           v-model="localSkills.notes"
-          rows="3"
-          class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-        ></textarea>
+          :rows="3"
+          placeholder="Additional notes about the player..."
+        />
       </div>
     </div>
   </div>
@@ -226,6 +242,8 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import Label from './ui/Label.vue';
+import Textarea from './ui/Textarea.vue';
 
 const props = defineProps({
   skills: {
