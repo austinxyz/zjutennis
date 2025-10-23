@@ -7,9 +7,12 @@ A full-stack web application for managing and analyzing ZJU alumni tennis player
 - **Player Management**: CRUD operations for player profiles with detailed information
 - **Skills Assessment**: Track and rate player technical skills (forehand, backhand, serve, etc.)
 - **Statistics Tracking**: Monitor player ratings (UTR, NTRP, Dynamic Rating) and performance metrics
+- **UTR Update Tracking**: Automatically tracks when player's UTR rating is updated with timestamp
+- **Alumni Information**: Support for multiple graduation universities for player and their couple (up to 3 each)
 - **Sortable Player List**: View and sort players by UTR, NTRP, or gender
-- **Tabbed Edit Interface**: Organized player data entry with separate tabs for basic info, skills, and statistics
+- **Tabbed Edit Interface**: Organized player data entry with separate tabs for basic info, alumni, skills, and statistics
 - **CSV Import/Export**: Bulk import player data from CSV files and export selected players
+- **Database Migrations**: Organized migration scripts with comprehensive documentation
 - **Modern UI**: Professional design with shadcn-vue component library
 - **Responsive Design**: Mobile-friendly interface with Tailwind CSS and theme support
 - **Accessible Components**: WCAG-compliant UI components built on Radix Vue primitives
@@ -51,10 +54,12 @@ zjutennis/
 │   │   │   │   └── ImportResult.java
 │   │   │   ├── model/
 │   │   │   │   ├── Player.java
+│   │   │   │   ├── PlayerAlumni.java
 │   │   │   │   ├── PlayerSkills.java
 │   │   │   │   └── PlayerStatistics.java
 │   │   │   ├── repository/
 │   │   │   │   ├── PlayerRepository.java
+│   │   │   │   ├── PlayerAlumniRepository.java
 │   │   │   │   ├── PlayerSkillsRepository.java
 │   │   │   │   └── PlayerStatisticsRepository.java
 │   │   │   ├── service/
@@ -81,6 +86,7 @@ zjutennis/
 │   │   │   │   ├── Table.vue
 │   │   │   │   └── ... (other UI components)
 │   │   │   ├── PlayerBasicInfo.vue
+│   │   │   ├── PlayerAlumni.vue
 │   │   │   ├── PlayerSkills.vue
 │   │   │   └── PlayerStatistics.vue
 │   │   ├── views/
@@ -98,6 +104,15 @@ zjutennis/
 │   ├── package.json
 │   ├── vite.config.js
 │   └── tailwind.config.cjs
+├── db/                          # Database migration scripts
+│   ├── README.md                # Migration documentation
+│   ├── setup_database.sql
+│   ├── create_skill_tables.sql
+│   ├── add_gender_field.sql
+│   ├── add_rating_status_fields.sql
+│   ├── add_statistics_url_fields.sql
+│   ├── db_migration_add_utr_updated_date.sql
+│   └── db_migration_add_player_alumni.sql
 └── pom.xml
 ```
 
@@ -106,8 +121,13 @@ zjutennis/
 ### Player
 - Basic information: name, email, gender, phone number
 - Location: city, country
-- Academic: graduation year, major
-- Relationships: OneToOne with PlayerSkills and PlayerStatistics
+- Relationships: OneToOne with PlayerSkills, PlayerStatistics, and PlayerAlumni
+
+### PlayerAlumni
+- Player's graduation universities: up to 3 universities with graduation years
+- Couple's graduation universities: up to 3 universities with graduation years
+- Automatically managed with cascade operations
+- Created/updated timestamps
 
 ### PlayerSkills
 - Technical ratings (1-10): forehand, backhand, serve, volley, smash, etc.
@@ -117,6 +137,8 @@ zjutennis/
 
 ### PlayerStatistics
 - Ratings: UTR, NTRP, Dynamic Rating, Self Rating
+- UTR tracking: rating, status, URL, and last updated timestamp
+- NTRP tracking: rating, status, URL
 - Match statistics: total matches, wins, losses, win rates
 - Performance: serve percentage, break point conversion
 - Preferences: surface, playing style, doubles position
@@ -163,6 +185,31 @@ CREATE DATABASE zjualumni;
 ```
 
 The application will auto-create tables on first run (`spring.jpa.hibernate.ddl-auto=none` is set, but entities are configured with proper JPA annotations).
+
+### Database Migrations
+
+All database migration scripts are located in the `db/` folder with comprehensive documentation:
+
+```bash
+db/
+├── README.md                               # Complete migration documentation
+├── setup_database.sql                      # Initial database and tables setup
+├── create_skill_tables.sql                 # Player skills and statistics tables
+├── add_gender_field.sql                    # Add gender field to players
+├── add_rating_status_fields.sql            # Add UTR/NTRP status fields
+├── add_statistics_url_fields.sql           # Add URL fields for ratings
+├── db_migration_add_utr_updated_date.sql   # Add UTR update tracking
+└── db_migration_add_player_alumni.sql      # Add alumni information table
+```
+
+To run migrations, see the detailed instructions in `db/README.md`. Migration order is important - follow the documentation carefully.
+
+**Quick migration example:**
+```bash
+mysql -h your-host -P port -u username -p database_name < db/db_migration_add_utr_updated_date.sql
+```
+
+**Important:** Always restart the backend server after running database migrations to ensure schema changes are picked up.
 
 ### UI Components
 
@@ -242,19 +289,25 @@ The frontend will start on `http://localhost:5173`
 
 ### Response Format
 
-Players are returned with embedded skills and statistics:
+Players are returned with embedded skills, statistics, and alumni information:
 
 ```json
 {
   "id": 1,
   "name": "John Doe",
   "email": "john@example.com",
-  "gender": "Male",
-  "graduationYear": 2020,
-  "major": "Computer Science",
+  "gender": "male",
   "city": "San Francisco",
   "country": "USA",
   "phoneNumber": "+1234567890",
+  "alumni": {
+    "graduationUniversity1": "Zhejiang University",
+    "graduationYear1": 2020,
+    "graduationUniversity2": "Stanford University",
+    "graduationYear2": 2022,
+    "coupleGraduationUniversity1": "UC Berkeley",
+    "coupleGraduationYear1": 2019
+  },
   "skills": {
     "forehand": 8,
     "backhand": 7,
@@ -265,7 +318,10 @@ Players are returned with embedded skills and statistics:
   "statistics": {
     "utrRating": 10.5,
     "utrStatus": "verified",
+    "utrUrl": "https://app.myutr.com/profiles/12345",
+    "utrUpdatedDate": "2025-10-23T14:30:00",
     "ntrpRating": 4.5,
+    "ntrpStatus": "verified",
     "totalMatches": 50,
     "wins": 35,
     "losses": 15,
