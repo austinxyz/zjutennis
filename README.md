@@ -1,9 +1,20 @@
-# ZJU Tennis - Player Analysis Backend Service
+# ZJU Tennis - Player Analysis System
 
-A Spring Boot backend service for tennis player analysis and management.
+A full-stack web application for managing and analyzing ZJU alumni tennis players, featuring comprehensive player profiles, skills assessment, and statistical tracking.
+
+## Features
+
+- **Player Management**: CRUD operations for player profiles with detailed information
+- **Skills Assessment**: Track and rate player technical skills (forehand, backhand, serve, etc.)
+- **Statistics Tracking**: Monitor player ratings (UTR, NTRP, Dynamic Rating) and performance metrics
+- **Sortable Player List**: View and sort players by UTR, NTRP, or gender
+- **Tabbed Edit Interface**: Organized player data entry with separate tabs for basic info, skills, and statistics
+- **CSV Import**: Bulk import player data from CSV files
+- **Responsive Design**: Modern UI with Tailwind CSS and theme support
 
 ## Technology Stack
 
+### Backend
 - Java 17
 - Spring Boot 2.7.5
 - Spring Data JPA
@@ -11,15 +22,12 @@ A Spring Boot backend service for tennis player analysis and management.
 - Maven
 - Lombok
 
-## Database Configuration
-
-The application connects to a MySQL database named `zjualumni`. Update the database configuration in `src/main/resources/application.properties`:
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/zjualumni
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-```
+### Frontend
+- Vue 3 (Composition API)
+- Vue Router 4
+- Axios
+- Tailwind CSS
+- Vite
 
 ## Project Structure
 
@@ -27,77 +35,259 @@ spring.datasource.password=your_password
 zjutennis/
 ├── src/
 │   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── zjutennis/
-│   │   │           ├── ZjutennisApplication.java
-│   │   │           ├── controller/
-│   │   │           │   └── PlayerController.java
-│   │   │           ├── service/
-│   │   │           │   └── PlayerService.java
-│   │   │           ├── repository/
-│   │   │           │   └── PlayerRepository.java
-│   │   │           ├── model/
-│   │   │           │   └── Player.java
-│   │   │           └── config/
+│   │   ├── java/com/zjutennis/
+│   │   │   ├── ZjutennisApplication.java
+│   │   │   ├── config/
+│   │   │   │   └── DataLoader.java
+│   │   │   ├── controller/
+│   │   │   │   └── PlayerController.java
+│   │   │   ├── dto/
+│   │   │   │   └── ImportResult.java
+│   │   │   ├── model/
+│   │   │   │   ├── Player.java
+│   │   │   │   ├── PlayerSkills.java
+│   │   │   │   └── PlayerStatistics.java
+│   │   │   ├── repository/
+│   │   │   │   ├── PlayerRepository.java
+│   │   │   │   ├── PlayerSkillsRepository.java
+│   │   │   │   └── PlayerStatisticsRepository.java
+│   │   │   ├── service/
+│   │   │   │   ├── PlayerService.java
+│   │   │   │   ├── PlayerSkillsService.java
+│   │   │   │   ├── PlayerStatisticsService.java
+│   │   │   │   └── DataImportService.java
+│   │   │   └── util/
+│   │   │       └── CSVUtil.java
 │   │   └── resources/
-│   │       └── application.properties
+│   │       ├── application.properties
+│   │       └── ZJUAlumni.csv
 │   └── test/
-│       └── java/
-│           └── com/
-│               └── zjutennis/
-│                   └── ZjutennisApplicationTests.java
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── PlayerBasicInfo.vue
+│   │   │   ├── PlayerSkills.vue
+│   │   │   └── PlayerStatistics.vue
+│   │   ├── views/
+│   │   │   ├── PlayerList.vue
+│   │   │   └── PlayerEdit.vue
+│   │   ├── services/
+│   │   │   └── playerService.js
+│   │   ├── router/
+│   │   │   └── index.js
+│   │   ├── App.vue
+│   │   └── main.js
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   └── tailwind.config.cjs
 └── pom.xml
 ```
 
-## Building the Project
+## Database Schema
+
+### Player
+- Basic information: name, email, gender, phone number
+- Location: city, country
+- Academic: graduation year, major
+- Relationships: OneToOne with PlayerSkills and PlayerStatistics
+
+### PlayerSkills
+- Technical ratings (1-10): forehand, backhand, serve, volley, smash, etc.
+- Mental & physical: mental strength, movement, fitness
+- Tactical: court positioning, shot selection, competitive spirit
+- Notes: strengths, weaknesses, general notes
+
+### PlayerStatistics
+- Ratings: UTR, NTRP, Dynamic Rating, Self Rating
+- Match statistics: total matches, wins, losses, win rates
+- Performance: serve percentage, break point conversion
+- Preferences: surface, playing style, doubles position
+- Activity: play frequency, practice hours, tournament participation
+
+## Setup and Installation
+
+### Prerequisites
+- Java 17 or higher
+- Maven 3.6+
+- MySQL 8.0+
+- Node.js 16+ and npm
+
+### Database Configuration
+
+1. Create a `.env` file in the project root (copy from `.env.example`):
 
 ```bash
-mvn clean install
+cp .env.example .env
 ```
 
-## Running the Application
+2. Update the `.env` file with your database credentials:
+
+```properties
+DB_URL=jdbc:mysql://your-host:port/zjualumni?ssl-mode=REQUIRED
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
+
+The application will automatically load these environment variables. The `.env` file is gitignored for security.
+
+Alternatively, you can set environment variables directly:
 
 ```bash
-mvn spring-boot:run
+export DB_URL=jdbc:mysql://your-host:port/zjualumni?ssl-mode=REQUIRED
+export DB_USERNAME=your_username
+export DB_PASSWORD=your_password
 ```
 
-The application will start on port 8080.
+3. Create the database schema:
+
+```sql
+CREATE DATABASE zjualumni;
+```
+
+The application will auto-create tables on first run (`spring.jpa.hibernate.ddl-auto=none` is set, but entities are configured with proper JPA annotations).
+
+### Backend Setup
+
+1. Build the project:
+
+```bash
+./mvnw clean install
+```
+
+2. Run the application:
+
+```bash
+# If using .env file
+set -a && source .env && set +a && ./mvnw spring-boot:run
+
+# Or if environment variables are already set
+./mvnw spring-boot:run
+```
+
+The backend will start on `http://localhost:8080`
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+
+```bash
+cd frontend
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Run the development server:
+
+```bash
+npm run dev
+```
+
+The frontend will start on `http://localhost:5173`
 
 ## API Endpoints
 
 ### Player Management
 
-- `GET /api/players` - Get all players
-- `GET /api/players/{id}` - Get player by ID
-- `GET /api/players/email/{email}` - Get player by email
-- `GET /api/players/graduation-year/{year}` - Get players by graduation year
-- `GET /api/players/city/{city}` - Get players by city
-- `GET /api/players/utr/{minUtr}` - Get players with UTR rating >= minUtr
-- `POST /api/players` - Create new player
-- `PUT /api/players/{id}` - Update player
-- `DELETE /api/players/{id}` - Delete player
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/players` | Get all players |
+| GET | `/api/players/{id}` | Get player by ID |
+| POST | `/api/players` | Create new player |
+| PUT | `/api/players/{id}` | Update player |
+| DELETE | `/api/players/{id}` | Delete player |
+| POST | `/api/players/import` | Import players from CSV |
 
-## Database Schema
+### Response Format
 
-The `Player` entity includes the following fields:
-- id (Primary Key)
-- name
-- email
-- utrRating
-- graduationYear
-- major
-- city
-- country
-- phoneNumber
-- createdAt (auto-generated)
-- updatedAt (auto-generated)
+Players are returned with embedded skills and statistics:
 
-## Next Steps
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john@example.com",
+  "gender": "Male",
+  "graduationYear": 2020,
+  "major": "Computer Science",
+  "city": "San Francisco",
+  "country": "USA",
+  "phoneNumber": "+1234567890",
+  "skills": {
+    "forehand": 8,
+    "backhand": 7,
+    "serve": 9,
+    "strengths": "Powerful serve, consistent baseline play",
+    "weaknesses": "Net play needs improvement"
+  },
+  "statistics": {
+    "utrRating": 10.5,
+    "utrStatus": "verified",
+    "ntrpRating": 4.5,
+    "totalMatches": 50,
+    "wins": 35,
+    "losses": 15,
+    "winRate": 70.0
+  }
+}
+```
 
-1. Update database credentials in `application.properties`
-2. Create the database schema (or enable `spring.jpa.hibernate.ddl-auto=update` for auto-creation)
-3. Add additional entities and business logic as needed
-4. Implement authentication and authorization
-5. Add integration tests
-6. Configure logging and monitoring
+## Data Import
+
+The application supports CSV import with automatic data loading on startup:
+
+1. Place your CSV file in `src/main/resources/`
+2. Configure the file path in `DataLoader.java`
+3. On startup, if no players exist, the CSV will be automatically imported
+4. CSV format: name, email, city, utrRating, graduationYear, status, major, country
+
+## Development
+
+### Running Tests
+
+```bash
+./mvnw test
+```
+
+### Building for Production
+
+Backend:
+```bash
+./mvnw clean package
+java -jar target/zjutennis-0.0.1-SNAPSHOT.jar
+```
+
+Frontend:
+```bash
+cd frontend
+npm run build
+```
+
+The production build will be in `frontend/dist/`
+
+## Security Notes
+
+- Database credentials are managed via environment variables
+- `.env` file is excluded from version control
+- Never commit sensitive credentials to the repository
+- Use `.env.example` as a template for other developers
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is private and proprietary.
+
+## Contact
+
+For questions or support, please contact the development team.
