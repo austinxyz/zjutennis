@@ -2,20 +2,39 @@
 
 A full-stack web application for managing and analyzing ZJU alumni tennis players, featuring comprehensive player profiles, skills assessment, and statistical tracking.
 
+> 📋 For complete product requirements and roadmap, see [Product Requirements Document (PRD)](./requirement/PRD.md)
+
 ## Features
 
-- **Player Management**: CRUD operations for player profiles with detailed information
-- **Skills Assessment**: Track and rate player technical skills (forehand, backhand, serve, etc.)
-- **Statistics Tracking**: Monitor player ratings (UTR, NTRP, Dynamic Rating) and performance metrics
-- **UTR Update Tracking**: Automatically tracks when player's UTR rating is updated with timestamp
-- **Alumni Information**: Support for multiple graduation universities for player and their couple (up to 3 each)
-- **Sortable Player List**: View and sort players by UTR, NTRP, or gender
-- **Tabbed Edit Interface**: Organized player data entry with separate tabs for basic info, alumni, skills, and statistics
-- **CSV Import/Export**: Bulk import player data from CSV files and export selected players
-- **Database Migrations**: Organized migration scripts with comprehensive documentation
-- **Modern UI**: Professional design with shadcn-vue component library
-- **Responsive Design**: Mobile-friendly interface with Tailwind CSS and theme support
-- **Accessible Components**: WCAG-compliant UI components built on Radix Vue primitives
+### Player Management
+- **Complete Player Profiles**: Manage comprehensive player information including contact details, location, and personal data
+- **Alumni Information**: Track multiple graduation universities for both players and their partners (up to 3 each with graduation years)
+- **Bulk Operations**: Import multiple players from CSV files and export selected players for analysis
+- **Smart Organization**: View and sort players by UTR rating, NTRP level, or gender
+
+### Skills & Performance Assessment
+- **Technical Skills Evaluation**: Rate and track player abilities across key areas:
+  - Shot techniques (forehand, backhand, serve, volley, smash)
+  - Physical attributes (movement, fitness, mental strength)
+  - Tactical capabilities (court positioning, shot selection, competitive spirit)
+- **Strengths & Weaknesses Tracking**: Record detailed notes on player advantages and improvement areas with automatic history tracking
+- **Performance History**: View historical changes to player strengths and weaknesses with timestamps
+
+### Statistics & Ratings
+- **Multi-Rating System**: Track official and self-assessed ratings:
+  - UTR (Universal Tennis Rating) with verification status and profile links
+  - NTRP (National Tennis Rating Program) with verification status
+  - Dynamic Rating and Self Rating
+- **Automatic UTR Update Tracking**: System automatically records when player's UTR rating is updated with timestamps
+- **Match Statistics**: Monitor total matches, wins, losses, and win rates
+- **Playing Preferences**: Track preferred surface, playing style, doubles position, and activity levels
+
+### User Experience
+- **Modern, Intuitive Interface**: Clean design with professional shadcn-vue component library
+- **Organized Data Entry**: Tabbed interface separating basic information, alumni details, skills, and statistics
+- **Always-Visible Basic Info**: Quick access to essential player information while editing
+- **Responsive Design**: Mobile-friendly interface that works on all devices
+- **Accessible Components**: WCAG-compliant UI components for better usability
 
 ## Technology Stack
 
