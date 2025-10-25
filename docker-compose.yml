@@ -1,9 +1,7 @@
 services:
   # Backend Spring Boot service
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: xuaustin/zjutennis-backend:latest
     container_name: zjutennis-backend
     ports:
       - "8080:8080"
@@ -25,9 +23,7 @@ services:
 
   # Frontend Vue.js service
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: xuaustin/zjutennis-frontend:latest
     container_name: zjutennis-frontend
     ports:
       - "80:80"

@@ -21,35 +21,41 @@
       <p class="text-destructive">{{ error }}</p>
     </div>
 
-    <Card v-else>
-      <!-- Tabs -->
-      <div class="border-b border-border">
-        <nav class="flex -mb-px">
-          <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            @click="activeTab = tab.id"
-            :class="[
-              'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
-              activeTab === tab.id
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-            ]"
-          >
-            {{ tab.label }}
-          </button>
-        </nav>
-      </div>
-
-      <!-- Tab Content -->
-      <div class="p-6">
-        <form @submit.prevent="savePlayer">
+    <form v-else @submit.prevent="savePlayer">
+      <!-- Basic Information Card - Always Visible -->
+      <Card class="mb-6">
+        <div class="p-6">
+          <h2 class="text-lg font-semibold text-foreground mb-4">Basic Information</h2>
           <PlayerBasicInfo
-            v-if="activeTab === 'basic'"
             :player="player"
             @update:player="player = $event"
           />
+        </div>
+      </Card>
 
+      <!-- Additional Information with Tabs -->
+      <Card>
+        <div class="border-b border-border">
+          <nav class="flex -mb-px">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              type="button"
+              @click="activeTab = tab.id"
+              :class="[
+                'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+                activeTab === tab.id
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+              ]"
+            >
+              {{ tab.label }}
+            </button>
+          </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="p-6">
           <PlayerAlumni
             v-if="activeTab === 'alumni'"
             :alumni="alumni"
@@ -59,6 +65,7 @@
           <PlayerSkills
             v-if="activeTab === 'skills'"
             :skills="skills"
+            :player-id="playerId"
             @update:skills="skills = $event"
           />
 
@@ -67,27 +74,27 @@
             :statistics="statistics"
             @update:statistics="statistics = $event"
           />
+        </div>
+      </Card>
 
-          <!-- Action Buttons -->
-          <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-border">
-            <Button
-              type="button"
-              @click="goBack"
-              variant="outline"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              :disabled="saving"
-            >
-              <Save class="mr-2 h-4 w-4" />
-              {{ saving ? 'Saving...' : 'Save' }}
-            </Button>
-          </div>
-        </form>
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-4 mt-6">
+        <Button
+          type="button"
+          @click="goBack"
+          variant="outline"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          :disabled="saving"
+        >
+          <Save class="mr-2 h-4 w-4" />
+          {{ saving ? 'Saving...' : 'Save' }}
+        </Button>
       </div>
-    </Card>
+    </form>
   </div>
 </template>
 
@@ -106,10 +113,16 @@ import Card from '../components/ui/Card.vue';
 const router = useRouter();
 const route = useRoute();
 
-const activeTab = ref('basic');
+const activeTab = ref('alumni');
 const loading = ref(true);
 const saving = ref(false);
 const error = ref(null);
+
+// Get playerId from route params
+const playerId = computed(() => {
+  const id = route.params.id;
+  return id === 'new' ? null : parseInt(id);
+});
 
 const player = ref({
   name: '',
@@ -194,7 +207,6 @@ const statisticsExist = ref(false);
 const alumniExist = ref(false);
 
 const tabs = [
-  { id: 'basic', label: 'Basic Information' },
   { id: 'alumni', label: 'Alumni Information' },
   { id: 'skills', label: 'Skills' },
   { id: 'statistics', label: 'Statistics' }
@@ -210,9 +222,8 @@ const loadPlayer = async () => {
 
   try {
     loading.value = true;
-    const playerId = parseInt(route.params.id);
 
-    const playerData = await playerService.getPlayerById(playerId);
+    const playerData = await playerService.getPlayerById(playerId.value);
     player.value = playerData;
 
     if (playerData.skills) {

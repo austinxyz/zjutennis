@@ -2,8 +2,11 @@ package com.zjutennis.service;
 
 import com.zjutennis.dto.ImportResult;
 import com.zjutennis.model.Player;
+import com.zjutennis.model.PlayerSkills;
+import com.zjutennis.model.PlayerSkillsHistory;
 import com.zjutennis.model.PlayerStatistics;
 import com.zjutennis.repository.PlayerRepository;
+import com.zjutennis.repository.PlayerSkillsHistoryRepository;
 import com.zjutennis.util.CSVUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,9 @@ public class PlayerService {
 
     @Autowired
     private PlayerRepository playerRepository;
+
+    @Autowired
+    private PlayerSkillsHistoryRepository playerSkillsHistoryRepository;
 
     public List<Player> getAllPlayers() {
         log.debug("Fetching all players");
@@ -66,7 +72,40 @@ public class PlayerService {
 
         // Update skills if provided
         if (playerDetails.getSkills() != null) {
-            player.setSkills(playerDetails.getSkills());
+            PlayerSkills newSkills = playerDetails.getSkills();
+            PlayerSkills existingSkills = player.getSkills();
+
+            // Check if strengths or weaknesses have changed and create history record
+            boolean strengthsChanged = false;
+            boolean weaknessesChanged = false;
+
+            if (existingSkills != null) {
+                String oldStrengths = existingSkills.getStrengths();
+                String newStrengthsValue = newSkills.getStrengths();
+                String oldWeaknesses = existingSkills.getWeaknesses();
+                String newWeaknessesValue = newSkills.getWeaknesses();
+
+                strengthsChanged = (newStrengthsValue != null && !newStrengthsValue.equals(oldStrengths)) ||
+                                  (newStrengthsValue == null && oldStrengths != null);
+                weaknessesChanged = (newWeaknessesValue != null && !newWeaknessesValue.equals(oldWeaknesses)) ||
+                                   (newWeaknessesValue == null && oldWeaknesses != null);
+            } else {
+                // No existing skills, any non-null value is a change
+                strengthsChanged = newSkills.getStrengths() != null && !newSkills.getStrengths().trim().isEmpty();
+                weaknessesChanged = newSkills.getWeaknesses() != null && !newSkills.getWeaknesses().trim().isEmpty();
+            }
+
+            // Create history record if either strengths or weaknesses changed
+            if (strengthsChanged || weaknessesChanged) {
+                PlayerSkillsHistory history = new PlayerSkillsHistory();
+                history.setPlayer(player);
+                history.setStrengths(newSkills.getStrengths());
+                history.setWeaknesses(newSkills.getWeaknesses());
+                playerSkillsHistoryRepository.save(history);
+                log.debug("Created skills history record for player {}", id);
+            }
+
+            player.setSkills(newSkills);
         }
 
         // Update statistics if provided
@@ -96,12 +135,6 @@ public class PlayerService {
         }
 
         return playerRepository.save(player);
-    }
-
-    @Transactional
-    public void deletePlayer(Long id) {
-        log.debug("Deleting player with id: {}", id);
-        playerRepository.deleteById(id);
     }
 
     @Transactional

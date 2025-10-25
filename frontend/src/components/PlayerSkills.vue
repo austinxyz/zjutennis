@@ -208,7 +208,19 @@
     <!-- Notes Section -->
     <div class="grid grid-cols-1 gap-6 mt-6">
       <div class="space-y-2">
-        <Label for="strengths">Strengths</Label>
+        <div class="flex items-center justify-between">
+          <Label for="strengths">Strengths</Label>
+          <Button
+            v-if="playerId"
+            type="button"
+            @click="() => { console.log('Toggle history, current:', showHistory, 'history length:', history.length); showHistory = !showHistory; }"
+            variant="ghost"
+            size="sm"
+            class="text-xs"
+          >
+            {{ showHistory ? 'Hide' : 'Show' }} History{{ history.length > 0 ? ` (${history.length})` : '' }}
+          </Button>
+        </div>
         <Textarea
           id="strengths"
           v-model="localSkills.strengths"
@@ -236,19 +248,46 @@
           placeholder="Additional notes about the player..."
         />
       </div>
+
+      <!-- History Section -->
+      <div v-if="showHistory" class="space-y-4 mt-6">
+        <h4 class="text-md font-semibold">Update History</h4>
+        <div v-if="history.length === 0" class="border rounded-lg p-4 text-center text-muted-foreground">
+          No history yet. Make changes to strengths or weaknesses to start tracking history.
+        </div>
+        <div v-else v-for="record in history" :key="record.id" class="border rounded-lg p-4 space-y-3 bg-muted/30">
+          <div class="text-xs text-muted-foreground">
+            {{ formatDate(record.createdAt) }}
+          </div>
+          <div v-if="record.strengths" class="space-y-1">
+            <div class="text-sm font-medium">Strengths:</div>
+            <div class="text-sm whitespace-pre-wrap">{{ record.strengths }}</div>
+          </div>
+          <div v-if="record.weaknesses" class="space-y-1">
+            <div class="text-sm font-medium">Weaknesses:</div>
+            <div class="text-sm whitespace-pre-wrap">{{ record.weaknesses }}</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+import axios from 'axios';
 import Label from './ui/Label.vue';
 import Textarea from './ui/Textarea.vue';
+import Button from './ui/Button.vue';
 
 const props = defineProps({
   skills: {
     type: Object,
     required: true
+  },
+  playerId: {
+    type: Number,
+    required: false
   }
 });
 
@@ -258,6 +297,41 @@ const emit = defineEmits(['update:skills']);
 const technicalRatings = [2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5];
 
 const localSkills = ref({ ...props.skills });
+const history = ref([]);
+const showHistory = ref(false);
+
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const fetchHistory = async () => {
+  if (!props.playerId) {
+    console.log('No playerId, skipping history fetch');
+    return;
+  }
+
+  try {
+    console.log('Fetching history for player:', props.playerId);
+    const response = await axios.get(`/api/players/${props.playerId}/skills-history`);
+    console.log('History response:', response.data);
+    history.value = response.data;
+    console.log('History array length:', history.value.length);
+  } catch (error) {
+    console.error('Error fetching skills history:', error);
+  }
+};
+
+onMounted(() => {
+  fetchHistory();
+});
 
 watch(localSkills, (newValue) => {
   emit('update:skills', newValue);
@@ -266,4 +340,8 @@ watch(localSkills, (newValue) => {
 watch(() => props.skills, (newValue) => {
   localSkills.value = { ...newValue };
 }, { deep: true });
+
+watch(() => props.playerId, () => {
+  fetchHistory();
+});
 </script>

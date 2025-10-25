@@ -2,7 +2,9 @@ package com.zjutennis.controller;
 
 import com.zjutennis.dto.ImportResult;
 import com.zjutennis.model.Player;
+import com.zjutennis.model.PlayerSkillsHistory;
 import com.zjutennis.service.PlayerService;
+import com.zjutennis.service.PlayerSkillsHistoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,9 @@ public class PlayerController {
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired
+    private PlayerSkillsHistoryService playerSkillsHistoryService;
 
     @GetMapping
     public ResponseEntity<List<Player>> getAllPlayers() {
@@ -70,11 +75,11 @@ public class PlayerController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePlayer(@PathVariable Long id) {
-        log.info("DELETE /api/players/{} - Deleting player", id);
-        playerService.deletePlayer(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/{id}/skills-history")
+    public ResponseEntity<List<PlayerSkillsHistory>> getPlayerSkillsHistory(@PathVariable Long id) {
+        log.info("GET /api/players/{}/skills-history - Fetching skills history", id);
+        List<PlayerSkillsHistory> history = playerSkillsHistoryService.getPlayerSkillsHistory(id);
+        return ResponseEntity.ok(history);
     }
 
     @PostMapping("/import")

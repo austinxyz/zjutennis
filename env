@@ -1,0 +1,6 @@
+# Database Configuration
+# DO NOT commit this file to git
+
+DB_URL=jdbc:mysql://10.0.0.7:37719/zjualumni?ssl-mode=REQUIRED
+DB_USERNAME=austinxu
+DB_PASSWORD=helloworld

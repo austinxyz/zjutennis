@@ -24,10 +24,6 @@ class PlayerService {
     return response.data;
   }
 
-  async deletePlayer(id) {
-    await axios.delete(`${API_URL}/${id}`);
-  }
-
   // Import players from CSV
   async importPlayersFromCSV(file) {
     const formData = new FormData();

@@ -178,15 +178,6 @@
                 >
                   <Pencil class="h-4 w-4" />
                 </Button>
-                <Button
-                  @click="confirmDelete(player)"
-                  variant="ghost"
-                  size="icon"
-                  title="Delete"
-                  class="text-destructive hover:text-destructive/80"
-                >
-                  <Trash2 class="h-4 w-4" />
-                </Button>
               </div>
             </TableCell>
           </TableRow>
@@ -199,7 +190,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { Plus, Pencil, Trash2, ExternalLink, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-vue-next';
+import { Plus, Pencil, ExternalLink, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-vue-next';
 import playerService from '../services/playerService';
 import Button from '../components/ui/Button.vue';
 import Card from '../components/ui/Card.vue';
@@ -289,17 +280,6 @@ const editPlayer = (id) => {
 
 const goToNewPlayer = () => {
   router.push('/players/new');
-};
-
-const confirmDelete = async (player) => {
-  if (confirm(`Are you sure you want to delete ${player.name}?`)) {
-    try {
-      await playerService.deletePlayer(player.id);
-      await loadPlayers();
-    } catch (err) {
-      alert('Failed to delete player: ' + err.message);
-    }
-  }
 };
 
 const toggleSelectAll = (event) => {
