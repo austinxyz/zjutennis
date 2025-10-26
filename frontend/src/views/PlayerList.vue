@@ -204,7 +204,7 @@
     <!-- Main Content: Player List + Details -->
     <div v-else class="flex-1 flex gap-6 overflow-hidden">
       <!-- Left: Player List -->
-      <div class="w-96 flex-shrink-0 flex flex-col">
+      <div class="w-64 flex-shrink-0 flex flex-col">
         <Card class="flex-1 flex flex-col overflow-hidden">
           <div class="p-4 border-b">
             <h2 class="font-semibold">Players ({{ players.length }})</h2>
@@ -391,8 +391,8 @@
           </div>
 
           <div class="flex-1 overflow-y-auto p-4">
-            <div class="grid grid-cols-2 gap-4">
-              <!-- Left Column: Stats Cards -->
+            <div class="grid grid-cols-3 gap-4">
+              <!-- Column 1: Ratings & Contact -->
               <div class="space-y-4">
                 <!-- Ratings Card -->
                 <Card v-if="selectedPlayer.statistics" class="p-4">
@@ -445,7 +445,10 @@
                     </div>
                   </div>
                 </Card>
+              </div>
 
+              <!-- Column 2: Performance & Preferences -->
+              <div class="space-y-4">
                 <!-- Performance Metrics Card -->
                 <Card v-if="selectedPlayer.statistics" class="p-4">
                   <PlayerPerformanceMetrics :statistics="selectedPlayer.statistics" />
@@ -467,7 +470,7 @@
                 </Card>
               </div>
 
-              <!-- Right Column: Skills Visualization -->
+              <!-- Column 3: Skills Visualization -->
               <div class="space-y-4">
                 <Card v-if="selectedPlayer.skills" class="p-4">
                   <h3 class="font-semibold text-sm mb-4">Technical Skills</h3>
