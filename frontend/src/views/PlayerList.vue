@@ -384,10 +384,16 @@
                 </span>
               </div>
             </div>
-            <Button @click="editPlayer(selectedPlayer.id)" size="sm">
-              <Pencil class="h-4 w-4 mr-2" />
-              Edit
-            </Button>
+            <div class="flex gap-2">
+              <Button @click="goToPlayerVideos(selectedPlayer.id)" variant="outline" size="sm">
+                <Video class="h-4 w-4 mr-2" />
+                Videos
+              </Button>
+              <Button @click="editPlayer(selectedPlayer.id)" size="sm">
+                <Pencil class="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+            </div>
           </div>
 
           <div class="flex-1 overflow-y-auto p-4">
@@ -528,7 +534,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { Plus, Pencil, ExternalLink, Search, ChevronDown, ChevronUp, Users, Save, X } from 'lucide-vue-next';
+import { Plus, Pencil, ExternalLink, Search, ChevronDown, ChevronUp, Users, Save, X, Video } from 'lucide-vue-next';
 import playerService from '../services/playerService';
 import Button from '../components/ui/Button.vue';
 import Card from '../components/ui/Card.vue';
@@ -783,6 +789,10 @@ const editPlayer = (id) => {
 
 const goToNewPlayer = () => {
   router.push('/players/new');
+};
+
+const goToPlayerVideos = (playerId) => {
+  router.push(`/players/${playerId}/videos`);
 };
 
 const savePlayer = async () => {

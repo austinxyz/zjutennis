@@ -3,6 +3,7 @@ import MainLayout from '../components/MainLayout.vue';
 import Dashboard from '../views/Dashboard.vue';
 import PlayerList from '../views/PlayerList.vue';
 import PlayerEdit from '../views/PlayerEdit.vue';
+import PlayerVideoAnalysis from '../views/PlayerVideoAnalysis.vue';
 
 // Player Analysis Views
 import VideoAnalysis from '../views/analysis/VideoAnalysis.vue';
@@ -63,6 +64,15 @@ const routes = [
         meta: {
           title: 'Edit Player',
           description: 'Update player information'
+        }
+      },
+      {
+        path: 'players/:playerId/videos',
+        name: 'PlayerVideoAnalysis',
+        component: PlayerVideoAnalysis,
+        meta: {
+          title: 'Player Video Analysis',
+          description: 'Manage and analyze player match videos'
         }
       },
       // Player Analysis
