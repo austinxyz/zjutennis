@@ -1,6 +1,8 @@
 package com.zjutennis.controller;
 
 import com.zjutennis.dto.ImportResult;
+import com.zjutennis.dto.PlayerSearchRequest;
+import com.zjutennis.dto.PlayerSearchResponse;
 import com.zjutennis.model.Player;
 import com.zjutennis.model.PlayerSkillsHistory;
 import com.zjutennis.service.PlayerService;
@@ -31,6 +33,13 @@ public class PlayerController {
         log.info("GET /api/players - Fetching all players");
         List<Player> players = playerService.getAllPlayers();
         return ResponseEntity.ok(players);
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<PlayerSearchResponse> searchPlayers(@RequestBody PlayerSearchRequest searchRequest) {
+        log.info("POST /api/players/search - Searching players with filters");
+        PlayerSearchResponse response = playerService.searchPlayers(searchRequest);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

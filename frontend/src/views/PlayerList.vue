@@ -5,7 +5,7 @@
       <div>
         <h1 class="text-2xl font-bold text-foreground">Player Management</h1>
         <p class="text-sm text-muted-foreground mt-1">
-          {{ filteredPlayers.length }} player{{ filteredPlayers.length !== 1 ? 's' : '' }} found
+          {{ totalCount }} player{{ totalCount !== 1 ? 's' : '' }} found
         </p>
       </div>
       <div class="flex gap-3">
@@ -244,7 +244,7 @@
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow v-if="filteredPlayers.length === 0">
+                <TableRow v-if="players.length === 0">
                   <TableCell :colspan="10" class="text-center py-8 text-muted-foreground">
                     No players found matching your criteria
                   </TableCell>
@@ -331,7 +331,7 @@
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="flex items-center justify-between mt-4">
           <div class="text-sm text-muted-foreground">
-            Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredPlayers.length) }} of {{ filteredPlayers.length }} results
+            Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, totalCount) }} of {{ totalCount }} results
           </div>
           <div class="flex items-center gap-2">
             <Button
@@ -413,6 +413,8 @@ const sortBy = ref(null);
 const sortOrder = ref('desc');
 const currentPage = ref(1);
 const pageSize = 25;
+const totalCount = ref(0);
+const totalPages = ref(0);
 
 // Search filters with default to Zhejiang University
 const filters = ref({
@@ -431,8 +433,26 @@ const filters = ref({
 const loadPlayers = async () => {
   try {
     loading.value = true;
-    const playersData = await playerService.getAllPlayers();
-    players.value = playersData;
+    const searchRequest = {
+      name: filters.value.name || null,
+      gender: filters.value.gender || null,
+      utrMin: filters.value.utrMin || null,
+      utrMax: filters.value.utrMax || null,
+      ntrp: filters.value.ntrp ? parseFloat(filters.value.ntrp) : null,
+      winRateMin: filters.value.winRateMin || null,
+      winRateMax: filters.value.winRateMax || null,
+      university: filters.value.university || null,
+      city: filters.value.city || null,
+      country: filters.value.country || null,
+      page: currentPage.value,
+      pageSize: pageSize,
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value
+    };
+    const response = await playerService.searchPlayers(searchRequest);
+    players.value = response.players;
+    totalCount.value = response.totalCount;
+    totalPages.value = response.totalPages;
   } catch (err) {
     error.value = 'Failed to load players: ' + err.message;
   } finally {
@@ -447,116 +467,14 @@ const getUniversity = (player) => {
   return '';
 };
 
-// Filter players based on search criteria
+// Filtered players is now just the players from the backend
 const filteredPlayers = computed(() => {
-  let filtered = [...players.value];
-
-  // Name filter
-  if (filters.value.name) {
-    const searchName = filters.value.name.toLowerCase();
-    filtered = filtered.filter(p =>
-      p.name?.toLowerCase().includes(searchName)
-    );
-  }
-
-  // Gender filter
-  if (filters.value.gender) {
-    filtered = filtered.filter(p => p.gender === filters.value.gender);
-  }
-
-  // UTR range filter
-  if (filters.value.utrMin !== null && filters.value.utrMin !== '') {
-    filtered = filtered.filter(p =>
-      p.statistics?.utrRating >= filters.value.utrMin
-    );
-  }
-  if (filters.value.utrMax !== null && filters.value.utrMax !== '') {
-    filtered = filtered.filter(p =>
-      p.statistics?.utrRating <= filters.value.utrMax
-    );
-  }
-
-  // NTRP filter
-  if (filters.value.ntrp) {
-    filtered = filtered.filter(p =>
-      p.statistics?.ntrpRating === parseFloat(filters.value.ntrp)
-    );
-  }
-
-  // Win rate range filter
-  if (filters.value.winRateMin !== null && filters.value.winRateMin !== '') {
-    filtered = filtered.filter(p =>
-      p.statistics?.winRate >= filters.value.winRateMin
-    );
-  }
-  if (filters.value.winRateMax !== null && filters.value.winRateMax !== '') {
-    filtered = filtered.filter(p =>
-      p.statistics?.winRate <= filters.value.winRateMax
-    );
-  }
-
-  // University filter
-  if (filters.value.university) {
-    const searchUni = filters.value.university.toLowerCase();
-    filtered = filtered.filter(p => {
-      const uni1 = p.alumni?.graduationUniversity1?.toLowerCase() || '';
-      const uni2 = p.alumni?.graduationUniversity2?.toLowerCase() || '';
-      const uni3 = p.alumni?.graduationUniversity3?.toLowerCase() || '';
-      return uni1.includes(searchUni) || uni2.includes(searchUni) || uni3.includes(searchUni);
-    });
-  }
-
-  // City filter
-  if (filters.value.city) {
-    const searchCity = filters.value.city.toLowerCase();
-    filtered = filtered.filter(p =>
-      p.city?.toLowerCase().includes(searchCity)
-    );
-  }
-
-  // Country filter
-  if (filters.value.country) {
-    const searchCountry = filters.value.country.toLowerCase();
-    filtered = filtered.filter(p =>
-      p.country?.toLowerCase().includes(searchCountry)
-    );
-  }
-
-  // Apply sorting
-  if (sortBy.value === 'utr') {
-    filtered.sort((a, b) => {
-      const aValue = a.statistics?.utrRating ?? -1;
-      const bValue = b.statistics?.utrRating ?? -1;
-      return sortOrder.value === 'asc' ? aValue - bValue : bValue - aValue;
-    });
-  } else if (sortBy.value === 'ntrp') {
-    filtered.sort((a, b) => {
-      const aValue = a.statistics?.ntrpRating ?? -1;
-      const bValue = b.statistics?.ntrpRating ?? -1;
-      return sortOrder.value === 'asc' ? aValue - bValue : bValue - aValue;
-    });
-  } else if (sortBy.value === 'gender') {
-    filtered.sort((a, b) => {
-      const aValue = a.gender || 'zzz';
-      const bValue = b.gender || 'zzz';
-      return sortOrder.value === 'asc'
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
-    });
-  }
-
-  return filtered;
+  return players.value;
 });
 
-// Paginated results
+// Paginated players is also just the players from the backend (already paginated)
 const paginatedPlayers = computed(() => {
-  const start = (currentPage.value - 1) * pageSize;
-  const end = start + pageSize;
-  return filteredPlayers.value.slice(start, end);
-});
-
-const totalPages = computed(() => {
-  return Math.ceil(filteredPlayers.value.length / pageSize);
+  return players.value;
 });
 
 const visiblePages = computed(() => {
@@ -589,10 +507,16 @@ const visiblePages = computed(() => {
   return pages;
 });
 
-// Reset to first page when filters change
+// Reload when filters change
 watch(() => filters.value, () => {
   currentPage.value = 1;
+  loadPlayers();
 }, { deep: true });
+
+// Reload when page changes
+watch(() => currentPage.value, () => {
+  loadPlayers();
+});
 
 const toggleSort = (column) => {
   if (sortBy.value === column) {
@@ -601,6 +525,7 @@ const toggleSort = (column) => {
     sortBy.value = column;
     sortOrder.value = 'desc';
   }
+  loadPlayers();
 };
 
 const resetFilters = () => {
@@ -669,8 +594,8 @@ const handleFileUpload = async (event) => {
 
 const exportToCSV = () => {
   const playersToExport = selectedPlayers.value.length > 0
-    ? filteredPlayers.value.filter(p => selectedPlayers.value.includes(p.id))
-    : filteredPlayers.value;
+    ? players.value.filter(p => selectedPlayers.value.includes(p.id))
+    : players.value;
 
   const headers = ['Player ID', 'Name', 'Gender', 'UTR Rating', 'UTR Status', 'NTRP Rating', 'NTRP Status', 'Win Rate', 'City', 'Country', 'University'];
 

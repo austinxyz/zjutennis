@@ -1,6 +1,8 @@
 package com.zjutennis.service;
 
 import com.zjutennis.dto.ImportResult;
+import com.zjutennis.dto.PlayerSearchRequest;
+import com.zjutennis.dto.PlayerSearchResponse;
 import com.zjutennis.model.Player;
 import com.zjutennis.model.PlayerSkills;
 import com.zjutennis.model.PlayerSkillsHistory;
@@ -16,9 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,6 +37,163 @@ public class PlayerService {
     public List<Player> getAllPlayers() {
         log.debug("Fetching all players");
         return playerRepository.findAll();
+    }
+
+    public PlayerSearchResponse searchPlayers(PlayerSearchRequest request) {
+        log.debug("Searching players with filters");
+
+        // Get all players and apply filters
+        List<Player> allPlayers = playerRepository.findAll();
+        List<Player> filteredPlayers = allPlayers.stream()
+                .filter(player -> matchesFilters(player, request))
+                .collect(Collectors.toList());
+
+        // Apply sorting
+        filteredPlayers = applySorting(filteredPlayers, request.getSortBy(), request.getSortOrder());
+
+        // Calculate pagination
+        long totalCount = filteredPlayers.size();
+        int page = request.getPage() != null ? request.getPage() : 1;
+        int pageSize = request.getPageSize() != null ? request.getPageSize() : 25;
+        int startIndex = (page - 1) * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, filteredPlayers.size());
+
+        // Get page of results
+        List<Player> pageResults = startIndex < filteredPlayers.size()
+                ? filteredPlayers.subList(startIndex, endIndex)
+                : List.of();
+
+        return new PlayerSearchResponse(pageResults, totalCount, page, pageSize);
+    }
+
+    private boolean matchesFilters(Player player, PlayerSearchRequest request) {
+        // Name filter
+        if (request.getName() != null && !request.getName().isEmpty()) {
+            if (player.getName() == null ||
+                !player.getName().toLowerCase().contains(request.getName().toLowerCase())) {
+                return false;
+            }
+        }
+
+        // Gender filter
+        if (request.getGender() != null && !request.getGender().isEmpty()) {
+            if (!request.getGender().equals(player.getGender())) {
+                return false;
+            }
+        }
+
+        // UTR range filter
+        if (request.getUtrMin() != null || request.getUtrMax() != null) {
+            PlayerStatistics stats = player.getStatistics();
+            if (stats == null || stats.getUtrRating() == null) {
+                return false;
+            }
+            if (request.getUtrMin() != null && stats.getUtrRating() < request.getUtrMin()) {
+                return false;
+            }
+            if (request.getUtrMax() != null && stats.getUtrRating() > request.getUtrMax()) {
+                return false;
+            }
+        }
+
+        // NTRP filter
+        if (request.getNtrp() != null) {
+            PlayerStatistics stats = player.getStatistics();
+            if (stats == null || stats.getNtrpRating() == null ||
+                !stats.getNtrpRating().equals(request.getNtrp())) {
+                return false;
+            }
+        }
+
+        // Win rate range filter
+        if (request.getWinRateMin() != null || request.getWinRateMax() != null) {
+            PlayerStatistics stats = player.getStatistics();
+            if (stats == null || stats.getWinRate() == null) {
+                return false;
+            }
+            if (request.getWinRateMin() != null && stats.getWinRate() < request.getWinRateMin()) {
+                return false;
+            }
+            if (request.getWinRateMax() != null && stats.getWinRate() > request.getWinRateMax()) {
+                return false;
+            }
+        }
+
+        // University filter
+        if (request.getUniversity() != null && !request.getUniversity().isEmpty()) {
+            if (player.getAlumni() == null) {
+                return false;
+            }
+            String searchUni = request.getUniversity().toLowerCase();
+            String uni1 = player.getAlumni().getGraduationUniversity1();
+            String uni2 = player.getAlumni().getGraduationUniversity2();
+            String uni3 = player.getAlumni().getGraduationUniversity3();
+
+            boolean matches = (uni1 != null && uni1.toLowerCase().contains(searchUni)) ||
+                            (uni2 != null && uni2.toLowerCase().contains(searchUni)) ||
+                            (uni3 != null && uni3.toLowerCase().contains(searchUni));
+            if (!matches) {
+                return false;
+            }
+        }
+
+        // City filter
+        if (request.getCity() != null && !request.getCity().isEmpty()) {
+            if (player.getCity() == null ||
+                !player.getCity().toLowerCase().contains(request.getCity().toLowerCase())) {
+                return false;
+            }
+        }
+
+        // Country filter
+        if (request.getCountry() != null && !request.getCountry().isEmpty()) {
+            if (player.getCountry() == null ||
+                !player.getCountry().toLowerCase().contains(request.getCountry().toLowerCase())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private List<Player> applySorting(List<Player> players, String sortBy, String sortOrder) {
+        if (sortBy == null || sortBy.isEmpty()) {
+            return players;
+        }
+
+        Comparator<Player> comparator = null;
+
+        switch (sortBy.toLowerCase()) {
+            case "utr":
+                comparator = Comparator.comparing(p ->
+                    p.getStatistics() != null && p.getStatistics().getUtrRating() != null
+                        ? p.getStatistics().getUtrRating()
+                        : -1.0
+                );
+                break;
+            case "ntrp":
+                comparator = Comparator.comparing(p ->
+                    p.getStatistics() != null && p.getStatistics().getNtrpRating() != null
+                        ? p.getStatistics().getNtrpRating()
+                        : -1.0
+                );
+                break;
+            case "gender":
+                comparator = Comparator.comparing(p ->
+                    p.getGender() != null ? p.getGender() : "zzz"
+                );
+                break;
+            default:
+                return players;
+        }
+
+        if ("asc".equalsIgnoreCase(sortOrder)) {
+            players.sort(comparator);
+        } else {
+            players.sort(comparator.reversed());
+        }
+
+        return players;
     }
 
     public Optional<Player> getPlayerById(Long id) {
