@@ -14,8 +14,8 @@
         <div class="flex items-center gap-2">
           <span class="text-lg font-bold text-blue-600">{{ statistics.singlesUtrRating.toFixed(2) }}</span>
           <a
-            v-if="statistics.singlesUtrUrl"
-            :href="statistics.singlesUtrUrl"
+            v-if="statistics.utrUrl"
+            :href="statistics.utrUrl"
             target="_blank"
             class="text-primary hover:underline"
           >

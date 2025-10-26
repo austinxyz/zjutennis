@@ -608,7 +608,6 @@ const editingSkills = ref({
 const editingStatistics = ref({
   singlesUtrRating: null,
   singlesUtrStatus: '',
-  singlesUtrUrl: '',
   singlesUtrUpdatedDate: null,
   utrRating: null,
   utrStatus: '',
@@ -759,7 +758,7 @@ const editPlayer = (id) => {
       strengths: '', weaknesses: '', notes: ''
     };
     editingStatistics.value = player.statistics ? { ...player.statistics } : {
-      singlesUtrRating: null, singlesUtrStatus: '', singlesUtrUrl: '', singlesUtrUpdatedDate: null,
+      singlesUtrRating: null, singlesUtrStatus: '', singlesUtrUpdatedDate: null,
       utrRating: null, utrStatus: '', utrUrl: '', utrUpdatedDate: null,
       ntrpRating: null, ntrpStatus: '', ntrpUrl: '', dynamicRating: null,
       dynamicRatingUrl: '', selfRating: null, totalMatches: null, wins: null,

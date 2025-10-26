@@ -28,15 +28,6 @@
           </select>
         </div>
         <div class="space-y-2">
-          <Label for="singlesUtrUrl">Singles UTR URL</Label>
-          <Input
-            id="singlesUtrUrl"
-            v-model="localStats.singlesUtrUrl"
-            type="url"
-            placeholder="https://app.myutr.com/profiles/..."
-          />
-        </div>
-        <div class="space-y-2">
           <Label for="singlesUtrUpdatedDate">Singles UTR Last Updated</Label>
           <Input
             id="singlesUtrUpdatedDate"

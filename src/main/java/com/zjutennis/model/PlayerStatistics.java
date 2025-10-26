@@ -35,9 +35,6 @@ public class PlayerStatistics {
     @Column(name = "singles_utr_status", length = 20)
     private String singlesUtrStatus; // rated, projected, unrated
 
-    @Column(name = "singles_utr_url", length = 500)
-    private String singlesUtrUrl;
-
     @Column(name = "singles_utr_updated_date")
     private LocalDateTime singlesUtrUpdatedDate;
 
