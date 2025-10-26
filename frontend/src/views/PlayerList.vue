@@ -217,31 +217,28 @@
               v-for="player in players"
               :key="player.id"
               @click="selectedPlayerId = player.id"
-              class="p-4 border-b cursor-pointer hover:bg-accent transition-colors"
+              class="p-3 border-b cursor-pointer hover:bg-accent transition-colors"
               :class="{ 'bg-accent': selectedPlayerId === player.id }"
             >
-              <div class="flex items-center justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      :value="player.id"
-                      v-model="selectedPlayers"
-                      @click.stop
-                      class="h-4 w-4 rounded border-input"
-                    />
-                    <h3 class="font-medium">{{ player.name }}</h3>
-                  </div>
-                  <div class="mt-1 text-sm text-muted-foreground">
-                    <span v-if="player.statistics?.utrRating">
-                      UTR: {{ player.statistics.utrRating.toFixed(2) }}
-                    </span>
-                    <span v-if="player.statistics?.ntrpRating" class="ml-2">
-                      | NTRP: {{ player.statistics.ntrpRating.toFixed(1) }}
-                    </span>
-                  </div>
-                  <div v-if="player.city || player.country" class="mt-1 text-xs text-muted-foreground">
-                    {{ player.city }}{{ player.city && player.country ? ', ' : '' }}{{ player.country }}
+              <div class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  :value="player.id"
+                  v-model="selectedPlayers"
+                  @click.stop
+                  class="h-4 w-4 rounded border-input flex-shrink-0"
+                />
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-2">
+                    <h3 class="font-medium text-sm truncate">{{ player.name }}</h3>
+                    <div class="flex items-center gap-1 text-xs flex-shrink-0">
+                      <span v-if="player.statistics?.utrRating" class="flex items-center gap-0.5 text-blue-600 font-medium" title="UTR Rating">
+                        <span class="text-[10px]">U</span>{{ player.statistics.utrRating.toFixed(2) }}
+                      </span>
+                      <span v-if="player.statistics?.ntrpRating" class="flex items-center gap-0.5 text-green-600 font-medium" title="NTRP Rating">
+                        <span class="text-[10px]">N</span>{{ player.statistics.ntrpRating.toFixed(1) }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
