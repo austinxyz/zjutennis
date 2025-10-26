@@ -84,9 +84,9 @@ const chartOptions = computed(() => ({
     r: {
       beginAtZero: true,
       min: 0,
-      max: 10,
+      max: 5.5,
       ticks: {
-        stepSize: 2,
+        stepSize: 1,
         color: 'rgb(107, 114, 128)'
       },
       grid: {
@@ -110,7 +110,7 @@ const chartOptions = computed(() => ({
     tooltip: {
       callbacks: {
         label: function(context) {
-          return context.label + ': ' + context.parsed.r + '/10';
+          return context.label + ': ' + context.parsed.r + '/5.5';
         }
       }
     }
