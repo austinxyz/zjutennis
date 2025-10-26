@@ -73,28 +73,6 @@
       </div>
     </div>
 
-    <!-- Playing Style & Preferences -->
-    <div v-if="hasPreferences" class="space-y-2 pt-2 mt-2 border-t">
-      <div v-if="statistics.preferredSurface" class="flex justify-between text-sm">
-        <span class="text-muted-foreground">Surface:</span>
-        <span class="font-medium capitalize">{{ statistics.preferredSurface }}</span>
-      </div>
-
-      <div v-if="statistics.preferredPlayingStyle" class="flex justify-between text-sm">
-        <span class="text-muted-foreground">Style:</span>
-        <span class="font-medium capitalize">{{ statistics.preferredPlayingStyle.replace('-', ' ') }}</span>
-      </div>
-
-      <div v-if="statistics.dominantHand" class="flex justify-between text-sm">
-        <span class="text-muted-foreground">Hand:</span>
-        <span class="font-medium capitalize">{{ statistics.dominantHand }}</span>
-      </div>
-
-      <div v-if="statistics.preferredDoublesPosition" class="flex justify-between text-sm">
-        <span class="text-muted-foreground">Doubles Position:</span>
-        <span class="font-medium capitalize">{{ statistics.preferredDoublesPosition.replace('-', ' ') }}</span>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -122,10 +100,5 @@ const hasAdditionalStats = computed(() => {
          (s.matchesPerMonth !== null && s.matchesPerMonth !== undefined) ||
          (s.practiceHoursPerWeek !== null && s.practiceHoursPerWeek !== undefined) ||
          s.averageMatchDurationMinutes;
-});
-
-const hasPreferences = computed(() => {
-  const s = props.statistics || {};
-  return s.preferredSurface || s.preferredPlayingStyle || s.dominantHand || s.preferredDoublesPosition;
 });
 </script>

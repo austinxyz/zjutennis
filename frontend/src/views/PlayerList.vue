@@ -451,6 +451,11 @@
                   <PlayerPerformanceMetrics :statistics="selectedPlayer.statistics" />
                 </Card>
 
+                <!-- Playing Preferences Card -->
+                <Card v-if="selectedPlayer.statistics" class="p-4">
+                  <PlayerPreferences :statistics="selectedPlayer.statistics" />
+                </Card>
+
                 <!-- Activity Level Card -->
                 <Card v-if="selectedPlayer.statistics" class="p-4">
                   <PlayerActivityLevel :statistics="selectedPlayer.statistics" />
@@ -537,6 +542,7 @@ import PlayerPerformanceMetrics from '../components/PlayerPerformanceMetrics.vue
 import PlayerActivityLevel from '../components/PlayerActivityLevel.vue';
 import PlayerRatingsOverview from '../components/PlayerRatingsOverview.vue';
 import PlayerGoalsAvailability from '../components/PlayerGoalsAvailability.vue';
+import PlayerPreferences from '../components/PlayerPreferences.vue';
 
 const router = useRouter();
 const players = ref([]);
