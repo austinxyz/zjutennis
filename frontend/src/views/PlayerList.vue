@@ -395,36 +395,8 @@
               <!-- Left Column: Stats Cards -->
               <div class="space-y-4">
                 <!-- Ratings Card -->
-                <Card class="p-4">
-                  <h3 class="font-semibold text-sm mb-3">Ratings</h3>
-                  <div class="space-y-3">
-                    <div v-if="selectedPlayer.statistics" class="flex items-center justify-between">
-                      <span class="text-sm text-muted-foreground">UTR</span>
-                      <a
-                        v-if="selectedPlayer.statistics.utrUrl"
-                        :href="selectedPlayer.statistics.utrUrl"
-                        target="_blank"
-                        class="text-primary hover:underline inline-flex items-center gap-1 font-medium"
-                      >
-                        {{ formatUTR(selectedPlayer.statistics) }}
-                        <ExternalLink class="h-3 w-3" />
-                      </a>
-                      <span v-else class="font-medium">{{ formatUTR(selectedPlayer.statistics) }}</span>
-                    </div>
-                    <div v-if="selectedPlayer.statistics" class="flex items-center justify-between">
-                      <span class="text-sm text-muted-foreground">NTRP</span>
-                      <a
-                        v-if="selectedPlayer.statistics.ntrpUrl"
-                        :href="selectedPlayer.statistics.ntrpUrl"
-                        target="_blank"
-                        class="text-primary hover:underline inline-flex items-center gap-1 font-medium"
-                      >
-                        {{ formatNTRP(selectedPlayer.statistics) }}
-                        <ExternalLink class="h-3 w-3" />
-                      </a>
-                      <span v-else class="font-medium">{{ formatNTRP(selectedPlayer.statistics) }}</span>
-                    </div>
-                  </div>
+                <Card v-if="selectedPlayer.statistics" class="p-4">
+                  <PlayerRatingsOverview :statistics="selectedPlayer.statistics" />
                 </Card>
 
                 <!-- Match Stats Card -->
@@ -477,6 +449,16 @@
                 <!-- Performance Metrics Card -->
                 <Card v-if="selectedPlayer.statistics" class="p-4">
                   <PlayerPerformanceMetrics :statistics="selectedPlayer.statistics" />
+                </Card>
+
+                <!-- Activity Level Card -->
+                <Card v-if="selectedPlayer.statistics" class="p-4">
+                  <PlayerActivityLevel :statistics="selectedPlayer.statistics" />
+                </Card>
+
+                <!-- Goals & Availability Card -->
+                <Card v-if="selectedPlayer.statistics" class="p-4">
+                  <PlayerGoalsAvailability :statistics="selectedPlayer.statistics" />
                 </Card>
               </div>
 
@@ -552,6 +534,9 @@ import PlayerAlumni from '../components/PlayerAlumni.vue';
 import PlayerSkillsRadar from '../components/PlayerSkillsRadar.vue';
 import PlayerSkillsBars from '../components/PlayerSkillsBars.vue';
 import PlayerPerformanceMetrics from '../components/PlayerPerformanceMetrics.vue';
+import PlayerActivityLevel from '../components/PlayerActivityLevel.vue';
+import PlayerRatingsOverview from '../components/PlayerRatingsOverview.vue';
+import PlayerGoalsAvailability from '../components/PlayerGoalsAvailability.vue';
 
 const router = useRouter();
 const players = ref([]);
