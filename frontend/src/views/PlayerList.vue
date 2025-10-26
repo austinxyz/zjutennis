@@ -475,16 +475,24 @@
                 </Card>
               </div>
 
-              <!-- Right Column: Skills Radar -->
+              <!-- Right Column: Skills Visualization -->
               <div class="space-y-4">
                 <Card v-if="selectedPlayer.skills" class="p-4">
-                  <h3 class="font-semibold text-sm mb-4">Skills Profile</h3>
-                  <div class="h-80">
+                  <h3 class="font-semibold text-sm mb-4">Technical Skills</h3>
+                  <div class="h-64">
                     <PlayerSkillsRadar :skills="selectedPlayer.skills" />
                   </div>
+                </Card>
 
-                  <!-- Strengths & Weaknesses -->
-                  <div v-if="selectedPlayer.skills.strengths || selectedPlayer.skills.weaknesses" class="mt-4 space-y-3">
+                <!-- Mental & Physical / Strategy & Tactics -->
+                <Card v-if="selectedPlayer.skills" class="p-4">
+                  <PlayerSkillsBars :skills="selectedPlayer.skills" />
+                </Card>
+
+                <!-- Strengths & Weaknesses -->
+                <Card v-if="selectedPlayer.skills && (selectedPlayer.skills.strengths || selectedPlayer.skills.weaknesses)" class="p-4">
+                  <h3 class="font-semibold text-sm mb-3">Analysis</h3>
+                  <div class="space-y-3">
                     <div v-if="selectedPlayer.skills.strengths" class="text-sm">
                       <span class="font-medium text-green-600">Strengths:</span>
                       <p class="mt-1 text-muted-foreground">{{ selectedPlayer.skills.strengths }}</p>
@@ -537,6 +545,7 @@ import PlayerSkills from '../components/PlayerSkills.vue';
 import PlayerStatistics from '../components/PlayerStatistics.vue';
 import PlayerAlumni from '../components/PlayerAlumni.vue';
 import PlayerSkillsRadar from '../components/PlayerSkillsRadar.vue';
+import PlayerSkillsBars from '../components/PlayerSkillsBars.vue';
 
 const router = useRouter();
 const players = ref([]);

@@ -45,14 +45,11 @@ const chartData = computed(() => {
       'Baseline',
       'Volley',
       'Smash',
-      'Return Serve',
-      'Mental',
-      'Movement',
-      'Fitness'
+      'Return Serve'
     ],
     datasets: [
       {
-        label: 'Skill Level',
+        label: 'Technical Skills',
         data: [
           skills.forehand || 0,
           skills.backhand || 0,
@@ -60,10 +57,7 @@ const chartData = computed(() => {
           skills.baseline || 0,
           skills.volley || 0,
           skills.smash || 0,
-          skills.returnServe || 0,
-          skills.mental || 0,
-          skills.movement || 0,
-          skills.fitness || 0
+          skills.returnServe || 0
         ],
         backgroundColor: 'rgba(59, 130, 246, 0.2)',
         borderColor: 'rgb(59, 130, 246)',
