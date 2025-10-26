@@ -293,9 +293,84 @@
         </Card>
       </div>
 
-      <!-- Right: Player Details -->
+      <!-- Right: Player Details or Edit Form -->
       <div class="flex-1 flex flex-col overflow-hidden">
-        <Card v-if="selectedPlayer" class="flex-1 flex flex-col overflow-hidden">
+        <!-- Edit Mode -->
+        <Card v-if="editMode && selectedPlayer" class="flex-1 flex flex-col overflow-hidden">
+          <div class="p-6 border-b">
+            <div class="flex justify-between items-start">
+              <h2 class="text-2xl font-bold">Edit Player</h2>
+              <div class="flex gap-2">
+                <Button @click="cancelEdit" variant="outline" size="sm">
+                  <X class="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+                <Button @click="savePlayer" :disabled="saving" size="sm">
+                  <Save class="h-4 w-4 mr-2" />
+                  {{ saving ? 'Saving...' : 'Save' }}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto">
+            <form @submit.prevent="savePlayer">
+              <!-- Basic Information Card -->
+              <div class="p-6 border-b">
+                <h3 class="text-lg font-semibold mb-4">Basic Information</h3>
+                <PlayerBasicInfo
+                  :player="editingPlayer"
+                  @update:player="editingPlayer = $event"
+                />
+              </div>
+
+              <!-- Tabs for Additional Information -->
+              <div class="border-b border-border">
+                <nav class="flex -mb-px">
+                  <button
+                    v-for="tab in tabs"
+                    :key="tab.id"
+                    type="button"
+                    @click="activeTab = tab.id"
+                    :class="[
+                      'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+                      activeTab === tab.id
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                    ]"
+                  >
+                    {{ tab.label }}
+                  </button>
+                </nav>
+              </div>
+
+              <!-- Tab Content -->
+              <div class="p-6">
+                <PlayerAlumni
+                  v-if="activeTab === 'alumni'"
+                  :alumni="editingAlumni"
+                  @update:alumni="editingAlumni = $event"
+                />
+
+                <PlayerSkills
+                  v-if="activeTab === 'skills'"
+                  :skills="editingSkills"
+                  :player-id="selectedPlayerId"
+                  @update:skills="editingSkills = $event"
+                />
+
+                <PlayerStatistics
+                  v-if="activeTab === 'statistics'"
+                  :statistics="editingStatistics"
+                  @update:statistics="editingStatistics = $event"
+                />
+              </div>
+            </form>
+          </div>
+        </Card>
+
+        <!-- View Mode -->
+        <Card v-else-if="selectedPlayer" class="flex-1 flex flex-col overflow-hidden">
           <div class="p-6 border-b">
             <div class="flex justify-between items-start">
               <div>
@@ -452,13 +527,17 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { Plus, Pencil, ExternalLink, Search, ChevronDown, ChevronUp, Users } from 'lucide-vue-next';
+import { Plus, Pencil, ExternalLink, Search, ChevronDown, ChevronUp, Users, Save, X } from 'lucide-vue-next';
 import playerService from '../services/playerService';
 import Button from '../components/ui/Button.vue';
 import Card from '../components/ui/Card.vue';
 import Badge from '../components/ui/Badge.vue';
 import Label from '../components/ui/Label.vue';
 import Input from '../components/ui/Input.vue';
+import PlayerBasicInfo from '../components/PlayerBasicInfo.vue';
+import PlayerSkills from '../components/PlayerSkills.vue';
+import PlayerStatistics from '../components/PlayerStatistics.vue';
+import PlayerAlumni from '../components/PlayerAlumni.vue';
 
 const router = useRouter();
 const players = ref([]);
@@ -472,6 +551,9 @@ const totalCount = ref(0);
 const totalPages = ref(0);
 const simpleSearch = ref('');
 const showAdvancedSearch = ref(false);
+const editMode = ref(false);
+const saving = ref(false);
+const activeTab = ref('alumni');
 
 // Advanced filters
 const filters = ref({
@@ -485,6 +567,91 @@ const filters = ref({
   city: '',
   country: ''
 });
+
+// Edit form data
+const editingPlayer = ref({
+  name: '',
+  email: '',
+  city: '',
+  country: '',
+  phoneNumber: '',
+  gender: ''
+});
+
+const editingSkills = ref({
+  forehand: null,
+  backhand: null,
+  baseline: null,
+  volley: null,
+  smash: null,
+  serve: null,
+  returnServe: null,
+  mental: null,
+  movement: null,
+  fitness: null,
+  courtPositioning: null,
+  shotSelection: null,
+  competitiveSpirit: null,
+  strengths: '',
+  weaknesses: '',
+  notes: ''
+});
+
+const editingStatistics = ref({
+  utrRating: null,
+  utrStatus: '',
+  utrUrl: '',
+  utrUpdatedDate: null,
+  ntrpRating: null,
+  ntrpStatus: '',
+  ntrpUrl: '',
+  dynamicRating: null,
+  dynamicRatingUrl: '',
+  selfRating: null,
+  totalMatches: null,
+  wins: null,
+  losses: null,
+  winRate: null,
+  singlesWinRate: null,
+  doublesWinRate: null,
+  playFrequency: '',
+  matchesPerMonth: null,
+  practiceHoursPerWeek: null,
+  competitiveLevel: '',
+  tournamentParticipation: null,
+  leagueParticipation: null,
+  servePercentage: null,
+  firstServePercentage: null,
+  breakPointConversion: null,
+  averageMatchDurationMinutes: null,
+  preferredSurface: '',
+  preferredPlayingStyle: '',
+  dominantHand: '',
+  preferredDoublesPosition: '',
+  availability: '',
+  goals: ''
+});
+
+const editingAlumni = ref({
+  graduationUniversity1: '',
+  graduationYear1: null,
+  graduationUniversity2: '',
+  graduationYear2: null,
+  graduationUniversity3: '',
+  graduationYear3: null,
+  coupleGraduationUniversity1: '',
+  coupleGraduationYear1: null,
+  coupleGraduationUniversity2: '',
+  coupleGraduationYear2: null,
+  coupleGraduationUniversity3: '',
+  coupleGraduationYear3: null
+});
+
+const tabs = [
+  { id: 'alumni', label: 'Alumni Information' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'statistics', label: 'Statistics' }
+];
 
 const loadPlayers = async () => {
   try {
@@ -570,11 +737,78 @@ const formatNTRP = (stats) => {
 };
 
 const editPlayer = (id) => {
-  router.push(`/players/${id}/edit`);
+  const player = players.value.find(p => p.id === id);
+  if (player) {
+    editingPlayer.value = { ...player };
+    editingSkills.value = player.skills ? { ...player.skills } : {
+      forehand: null, backhand: null, baseline: null, volley: null, smash: null,
+      serve: null, returnServe: null, mental: null, movement: null, fitness: null,
+      courtPositioning: null, shotSelection: null, competitiveSpirit: null,
+      strengths: '', weaknesses: '', notes: ''
+    };
+    editingStatistics.value = player.statistics ? { ...player.statistics } : {
+      utrRating: null, utrStatus: '', utrUrl: '', utrUpdatedDate: null,
+      ntrpRating: null, ntrpStatus: '', ntrpUrl: '', dynamicRating: null,
+      dynamicRatingUrl: '', selfRating: null, totalMatches: null, wins: null,
+      losses: null, winRate: null, singlesWinRate: null, doublesWinRate: null,
+      playFrequency: '', matchesPerMonth: null, practiceHoursPerWeek: null,
+      competitiveLevel: '', tournamentParticipation: null, leagueParticipation: null,
+      servePercentage: null, firstServePercentage: null, breakPointConversion: null,
+      averageMatchDurationMinutes: null, preferredSurface: '', preferredPlayingStyle: '',
+      dominantHand: '', preferredDoublesPosition: '', availability: '', goals: ''
+    };
+    editingAlumni.value = player.alumni ? { ...player.alumni } : {
+      graduationUniversity1: '', graduationYear1: null, graduationUniversity2: '',
+      graduationYear2: null, graduationUniversity3: '', graduationYear3: null,
+      coupleGraduationUniversity1: '', coupleGraduationYear1: null,
+      coupleGraduationUniversity2: '', coupleGraduationYear2: null,
+      coupleGraduationUniversity3: '', coupleGraduationYear3: null
+    };
+    editMode.value = true;
+    activeTab.value = 'alumni';
+  }
 };
 
 const goToNewPlayer = () => {
   router.push('/players/new');
+};
+
+const savePlayer = async () => {
+  try {
+    saving.value = true;
+
+    const playerToSave = {
+      ...editingPlayer.value,
+      skills: editingSkills.value && Object.values(editingSkills.value).some(v => v !== null && v !== '')
+        ? editingSkills.value
+        : null,
+      statistics: editingStatistics.value && Object.values(editingStatistics.value).some(v => v !== null && v !== '')
+        ? editingStatistics.value
+        : null,
+      alumni: editingAlumni.value && Object.values(editingAlumni.value).some(v => v !== null && v !== '')
+        ? editingAlumni.value
+        : null
+    };
+
+    await playerService.updatePlayer(playerToSave.id, playerToSave);
+
+    // Reload players to get updated data
+    await loadPlayers();
+
+    // Update selected player ID to the saved player
+    selectedPlayerId.value = playerToSave.id;
+    editMode.value = false;
+
+    alert('Player saved successfully!');
+  } catch (err) {
+    alert('Failed to save player: ' + err.message);
+  } finally {
+    saving.value = false;
+  }
+};
+
+const cancelEdit = () => {
+  editMode.value = false;
 };
 
 const clearSelection = () => {
