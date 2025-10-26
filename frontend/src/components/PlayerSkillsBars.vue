@@ -7,12 +7,12 @@
         <div v-if="skills.mental !== null && skills.mental !== undefined">
           <div class="flex justify-between text-sm mb-1">
             <span class="text-muted-foreground">Mental</span>
-            <span class="font-medium">{{ skills.mental }}/10</span>
+            <span class="font-medium">{{ skills.mental }}/4</span>
           </div>
           <div class="h-2 bg-muted rounded-full overflow-hidden">
             <div
               class="h-full bg-purple-500 transition-all"
-              :style="{ width: `${(skills.mental / 10) * 100}%` }"
+              :style="{ width: `${(skills.mental / 4) * 100}%` }"
             ></div>
           </div>
         </div>
@@ -20,12 +20,12 @@
         <div v-if="skills.movement !== null && skills.movement !== undefined">
           <div class="flex justify-between text-sm mb-1">
             <span class="text-muted-foreground">Movement</span>
-            <span class="font-medium">{{ skills.movement }}/10</span>
+            <span class="font-medium">{{ skills.movement }}/5</span>
           </div>
           <div class="h-2 bg-muted rounded-full overflow-hidden">
             <div
               class="h-full bg-purple-500 transition-all"
-              :style="{ width: `${(skills.movement / 10) * 100}%` }"
+              :style="{ width: `${(skills.movement / 5) * 100}%` }"
             ></div>
           </div>
         </div>
@@ -52,12 +52,12 @@
         <div v-if="skills.courtPositioning !== null && skills.courtPositioning !== undefined">
           <div class="flex justify-between text-sm mb-1">
             <span class="text-muted-foreground">Court Positioning</span>
-            <span class="font-medium">{{ skills.courtPositioning }}/10</span>
+            <span class="font-medium">{{ skills.courtPositioning }}/5</span>
           </div>
           <div class="h-2 bg-muted rounded-full overflow-hidden">
             <div
               class="h-full bg-green-500 transition-all"
-              :style="{ width: `${(skills.courtPositioning / 10) * 100}%` }"
+              :style="{ width: `${(skills.courtPositioning / 5) * 100}%` }"
             ></div>
           </div>
         </div>
@@ -65,12 +65,12 @@
         <div v-if="skills.shotSelection !== null && skills.shotSelection !== undefined">
           <div class="flex justify-between text-sm mb-1">
             <span class="text-muted-foreground">Shot Selection</span>
-            <span class="font-medium">{{ skills.shotSelection }}/10</span>
+            <span class="font-medium">{{ skills.shotSelection }}/5</span>
           </div>
           <div class="h-2 bg-muted rounded-full overflow-hidden">
             <div
               class="h-full bg-green-500 transition-all"
-              :style="{ width: `${(skills.shotSelection / 10) * 100}%` }"
+              :style="{ width: `${(skills.shotSelection / 5) * 100}%` }"
             ></div>
           </div>
         </div>
@@ -78,12 +78,12 @@
         <div v-if="skills.competitiveSpirit !== null && skills.competitiveSpirit !== undefined">
           <div class="flex justify-between text-sm mb-1">
             <span class="text-muted-foreground">Competitive Spirit</span>
-            <span class="font-medium">{{ skills.competitiveSpirit }}/10</span>
+            <span class="font-medium">{{ skills.competitiveSpirit }}/5</span>
           </div>
           <div class="h-2 bg-muted rounded-full overflow-hidden">
             <div
               class="h-full bg-green-500 transition-all"
-              :style="{ width: `${(skills.competitiveSpirit / 10) * 100}%` }"
+              :style="{ width: `${(skills.competitiveSpirit / 5) * 100}%` }"
             ></div>
           </div>
         </div>

@@ -11,7 +11,10 @@ import java.time.LocalDateTime;
 
 /**
  * Entity representing a player's technical skills evaluation
- * All skill ratings are on a scale of 1-10
+ * Skill ratings are on different scales:
+ * - Technical Skills: 0-5.5 scale (forehand, backhand, baseline, volley, smash, serve, returnServe)
+ * - Mental & Physical: mental (1-4), movement (1-5), fitness (1-10)
+ * - Strategy & Tactics: courtPositioning (1-5), shotSelection (1-5), competitiveSpirit (1-5)
  */
 @Entity
 @Table(name = "player_skills")
@@ -28,7 +31,7 @@ public class PlayerSkills {
     @JsonBackReference("player-skills")
     private Player player;
 
-    // Technical Skills (1-10 scale)
+    // Technical Skills (0-5.5 scale)
     @Column(name = "forehand")
     private Double forehand;
 
@@ -50,25 +53,25 @@ public class PlayerSkills {
     @Column(name = "return_serve")
     private Double returnServe;
 
-    // Mental and Physical Skills (1-10 scale)
+    // Mental and Physical Skills
     @Column(name = "mental")
-    private Double mental;
+    private Double mental;  // 1-4 scale
 
     @Column(name = "movement")
-    private Double movement;
+    private Double movement;  // 1-5 scale
 
     @Column(name = "fitness")
-    private Double fitness;
+    private Double fitness;  // 1-10 scale
 
-    // Strategy and Tactics (1-10 scale)
+    // Strategy and Tactics
     @Column(name = "court_positioning")
-    private Double courtPositioning;
+    private Double courtPositioning;  // 1-5 scale
 
     @Column(name = "shot_selection")
-    private Double shotSelection;
+    private Double shotSelection;  // 1-5 scale
 
     @Column(name = "competitive_spirit")
-    private Double competitiveSpirit;
+    private Double competitiveSpirit;  // 1-5 scale
 
     // Notes and Comments
     @Column(name = "strengths", columnDefinition = "TEXT")
