@@ -392,7 +392,7 @@
 
           <div class="flex-1 overflow-y-auto p-4">
             <div class="grid grid-cols-3 gap-4">
-              <!-- Column 1: Ratings & Contact -->
+              <!-- Column 1: Ratings, Contact & Goals -->
               <div class="space-y-4">
                 <!-- Ratings Card -->
                 <Card v-if="selectedPlayer.statistics" class="p-4">
@@ -445,15 +445,15 @@
                     </div>
                   </div>
                 </Card>
+
+                <!-- Goals & Availability Card -->
+                <Card v-if="selectedPlayer.statistics" class="p-4">
+                  <PlayerGoalsAvailability :statistics="selectedPlayer.statistics" />
+                </Card>
               </div>
 
-              <!-- Column 2: Performance & Preferences -->
+              <!-- Column 2: Preferences & Activity -->
               <div class="space-y-4">
-                <!-- Performance Metrics Card -->
-                <Card v-if="selectedPlayer.statistics" class="p-4">
-                  <PlayerPerformanceMetrics :statistics="selectedPlayer.statistics" />
-                </Card>
-
                 <!-- Playing Preferences Card -->
                 <Card v-if="selectedPlayer.statistics" class="p-4">
                   <PlayerPreferences :statistics="selectedPlayer.statistics" />
@@ -464,9 +464,9 @@
                   <PlayerActivityLevel :statistics="selectedPlayer.statistics" />
                 </Card>
 
-                <!-- Goals & Availability Card -->
+                <!-- Performance Metrics Card -->
                 <Card v-if="selectedPlayer.statistics" class="p-4">
-                  <PlayerGoalsAvailability :statistics="selectedPlayer.statistics" />
+                  <PlayerPerformanceMetrics :statistics="selectedPlayer.statistics" />
                 </Card>
               </div>
 
