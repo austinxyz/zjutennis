@@ -473,6 +473,11 @@
                     </div>
                   </div>
                 </Card>
+
+                <!-- Performance Metrics Card -->
+                <Card v-if="selectedPlayer.statistics" class="p-4">
+                  <PlayerPerformanceMetrics :statistics="selectedPlayer.statistics" />
+                </Card>
               </div>
 
               <!-- Right Column: Skills Visualization -->
@@ -546,6 +551,7 @@ import PlayerStatistics from '../components/PlayerStatistics.vue';
 import PlayerAlumni from '../components/PlayerAlumni.vue';
 import PlayerSkillsRadar from '../components/PlayerSkillsRadar.vue';
 import PlayerSkillsBars from '../components/PlayerSkillsBars.vue';
+import PlayerPerformanceMetrics from '../components/PlayerPerformanceMetrics.vue';
 
 const router = useRouter();
 const players = ref([]);
