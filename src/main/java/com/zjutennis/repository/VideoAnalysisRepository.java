@@ -15,6 +15,11 @@ import java.util.List;
 public interface VideoAnalysisRepository extends JpaRepository<VideoAnalysis, Long> {
 
     /**
+     * Find all videos across all players ordered by match date
+     */
+    List<VideoAnalysis> findAllByOrderByMatchDateDesc();
+
+    /**
      * Find all videos for a specific player
      */
     List<VideoAnalysis> findByPlayerIdOrderByMatchDateDesc(Long playerId);

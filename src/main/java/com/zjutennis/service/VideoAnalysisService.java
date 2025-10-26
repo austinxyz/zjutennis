@@ -27,6 +27,14 @@ public class VideoAnalysisService {
     private PlayerRepository playerRepository;
 
     /**
+     * Get all videos across all players
+     */
+    public List<VideoAnalysis> getAllVideos() {
+        log.debug("Fetching all videos across all players");
+        return videoAnalysisRepository.findAllByOrderByMatchDateDesc();
+    }
+
+    /**
      * Get all videos for a specific player
      */
     public List<VideoAnalysis> getPlayerVideos(Long playerId) {

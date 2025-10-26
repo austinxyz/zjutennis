@@ -4,6 +4,15 @@ const API_URL = '/api/video-analysis';
 
 class VideoAnalysisService {
   /**
+   * Get all videos across all players
+   * @returns {Promise<Array>} List of all videos
+   */
+  async getAllVideos() {
+    const response = await axios.get(API_URL);
+    return response.data;
+  }
+
+  /**
    * Get all videos for a specific player
    * @param {number} playerId - Player ID
    * @returns {Promise<Array>} List of videos

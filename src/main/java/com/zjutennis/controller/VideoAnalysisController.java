@@ -26,6 +26,17 @@ public class VideoAnalysisController {
     private VideoAnalysisService videoAnalysisService;
 
     /**
+     * Get all videos across all players
+     * GET /api/video-analysis
+     */
+    @GetMapping
+    public ResponseEntity<List<VideoAnalysis>> getAllVideos() {
+        log.info("GET /api/video-analysis - Fetching all videos");
+        List<VideoAnalysis> videos = videoAnalysisService.getAllVideos();
+        return ResponseEntity.ok(videos);
+    }
+
+    /**
      * Get all videos for a specific player
      * GET /api/video-analysis/player/{playerId}
      */
