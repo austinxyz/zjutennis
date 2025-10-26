@@ -369,144 +369,142 @@
           </div>
         </Card>
 
-        <!-- View Mode -->
+        <!-- View Mode: Player Dashboard -->
         <Card v-else-if="selectedPlayer" class="flex-1 flex flex-col overflow-hidden">
-          <div class="p-6 border-b">
-            <div class="flex justify-between items-start">
-              <div>
-                <h2 class="text-2xl font-bold">{{ selectedPlayer.name }}</h2>
-                <div class="flex gap-2 mt-2">
-                  <Badge v-if="selectedPlayer.gender" variant="outline">
-                    {{ selectedPlayer.gender.charAt(0).toUpperCase() + selectedPlayer.gender.slice(1) }}
-                  </Badge>
-                </div>
+          <!-- Header -->
+          <div class="p-4 border-b flex justify-between items-start">
+            <div>
+              <h2 class="text-xl font-bold">{{ selectedPlayer.name }}</h2>
+              <div class="flex gap-2 mt-1 text-sm text-muted-foreground">
+                <span v-if="selectedPlayer.gender">
+                  {{ selectedPlayer.gender.charAt(0).toUpperCase() + selectedPlayer.gender.slice(1) }}
+                </span>
+                <span v-if="selectedPlayer.city || selectedPlayer.country">
+                  • {{ selectedPlayer.city }}{{ selectedPlayer.city && selectedPlayer.country ? ', ' : '' }}{{ selectedPlayer.country }}
+                </span>
               </div>
-              <Button @click="editPlayer(selectedPlayer.id)" size="sm">
-                <Pencil class="h-4 w-4 mr-2" />
-                Edit
-              </Button>
             </div>
+            <Button @click="editPlayer(selectedPlayer.id)" size="sm">
+              <Pencil class="h-4 w-4 mr-2" />
+              Edit
+            </Button>
           </div>
 
-          <div class="flex-1 overflow-y-auto p-6 space-y-6">
-            <!-- Contact Information -->
-            <div>
-              <h3 class="font-semibold mb-3">Contact Information</h3>
-              <div class="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span class="text-muted-foreground">Email:</span>
-                  <p>{{ selectedPlayer.email || '-' }}</p>
-                </div>
-                <div>
-                  <span class="text-muted-foreground">Phone:</span>
-                  <p>{{ selectedPlayer.phoneNumber || '-' }}</p>
-                </div>
-                <div>
-                  <span class="text-muted-foreground">City:</span>
-                  <p>{{ selectedPlayer.city || '-' }}</p>
-                </div>
-                <div>
-                  <span class="text-muted-foreground">Country:</span>
-                  <p>{{ selectedPlayer.country || '-' }}</p>
-                </div>
-              </div>
-            </div>
+          <div class="flex-1 overflow-y-auto p-4">
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Left Column: Stats Cards -->
+              <div class="space-y-4">
+                <!-- Ratings Card -->
+                <Card class="p-4">
+                  <h3 class="font-semibold text-sm mb-3">Ratings</h3>
+                  <div class="space-y-3">
+                    <div v-if="selectedPlayer.statistics" class="flex items-center justify-between">
+                      <span class="text-sm text-muted-foreground">UTR</span>
+                      <a
+                        v-if="selectedPlayer.statistics.utrUrl"
+                        :href="selectedPlayer.statistics.utrUrl"
+                        target="_blank"
+                        class="text-primary hover:underline inline-flex items-center gap-1 font-medium"
+                      >
+                        {{ formatUTR(selectedPlayer.statistics) }}
+                        <ExternalLink class="h-3 w-3" />
+                      </a>
+                      <span v-else class="font-medium">{{ formatUTR(selectedPlayer.statistics) }}</span>
+                    </div>
+                    <div v-if="selectedPlayer.statistics" class="flex items-center justify-between">
+                      <span class="text-sm text-muted-foreground">NTRP</span>
+                      <a
+                        v-if="selectedPlayer.statistics.ntrpUrl"
+                        :href="selectedPlayer.statistics.ntrpUrl"
+                        target="_blank"
+                        class="text-primary hover:underline inline-flex items-center gap-1 font-medium"
+                      >
+                        {{ formatNTRP(selectedPlayer.statistics) }}
+                        <ExternalLink class="h-3 w-3" />
+                      </a>
+                      <span v-else class="font-medium">{{ formatNTRP(selectedPlayer.statistics) }}</span>
+                    </div>
+                  </div>
+                </Card>
 
-            <!-- Alumni Information -->
-            <div v-if="selectedPlayer.alumni">
-              <h3 class="font-semibold mb-3">Education</h3>
-              <div class="space-y-2 text-sm">
-                <div v-if="selectedPlayer.alumni.graduationUniversity1">
-                  <span class="text-muted-foreground">University:</span>
-                  <p>{{ selectedPlayer.alumni.graduationUniversity1 }}
-                    <span v-if="selectedPlayer.alumni.graduationYear1">({{ selectedPlayer.alumni.graduationYear1 }})</span>
-                  </p>
-                </div>
-                <div v-if="selectedPlayer.alumni.graduationUniversity2">
-                  <p>{{ selectedPlayer.alumni.graduationUniversity2 }}
-                    <span v-if="selectedPlayer.alumni.graduationYear2">({{ selectedPlayer.alumni.graduationYear2 }})</span>
-                  </p>
-                </div>
-              </div>
-            </div>
+                <!-- Match Stats Card -->
+                <Card v-if="selectedPlayer.statistics" class="p-4">
+                  <h3 class="font-semibold text-sm mb-3">Match Statistics</h3>
+                  <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-muted-foreground">Win Rate</span>
+                      <span class="font-medium">
+                        {{ selectedPlayer.statistics.winRate !== null ? selectedPlayer.statistics.winRate.toFixed(1) + '%' : '-' }}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-muted-foreground">Total Matches</span>
+                      <span class="font-medium">{{ selectedPlayer.statistics.totalMatches || '-' }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-muted-foreground">Record</span>
+                      <span class="font-medium">
+                        {{ selectedPlayer.statistics.wins || 0 }}W - {{ selectedPlayer.statistics.losses || 0 }}L
+                      </span>
+                    </div>
+                  </div>
+                </Card>
 
-            <!-- Statistics -->
-            <div v-if="selectedPlayer.statistics">
-              <h3 class="font-semibold mb-3">Ratings & Statistics</h3>
-              <div class="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span class="text-muted-foreground">UTR:</span>
-                  <p>
-                    <a
-                      v-if="selectedPlayer.statistics.utrUrl"
-                      :href="selectedPlayer.statistics.utrUrl"
-                      target="_blank"
-                      class="text-primary hover:underline inline-flex items-center gap-1"
-                    >
-                      {{ formatUTR(selectedPlayer.statistics) }}
-                      <ExternalLink class="h-3 w-3" />
-                    </a>
-                    <span v-else>{{ formatUTR(selectedPlayer.statistics) }}</span>
-                  </p>
-                </div>
-                <div>
-                  <span class="text-muted-foreground">NTRP:</span>
-                  <p>
-                    <a
-                      v-if="selectedPlayer.statistics.ntrpUrl"
-                      :href="selectedPlayer.statistics.ntrpUrl"
-                      target="_blank"
-                      class="text-primary hover:underline inline-flex items-center gap-1"
-                    >
-                      {{ formatNTRP(selectedPlayer.statistics) }}
-                      <ExternalLink class="h-3 w-3" />
-                    </a>
-                    <span v-else>{{ formatNTRP(selectedPlayer.statistics) }}</span>
-                  </p>
-                </div>
-                <div>
-                  <span class="text-muted-foreground">Win Rate:</span>
-                  <p>{{ selectedPlayer.statistics.winRate !== null ? selectedPlayer.statistics.winRate.toFixed(1) + '%' : '-' }}</p>
-                </div>
-                <div>
-                  <span class="text-muted-foreground">Total Matches:</span>
-                  <p>{{ selectedPlayer.statistics.totalMatches || '-' }}</p>
-                </div>
-                <div>
-                  <span class="text-muted-foreground">Wins:</span>
-                  <p>{{ selectedPlayer.statistics.wins || '-' }}</p>
-                </div>
-                <div>
-                  <span class="text-muted-foreground">Losses:</span>
-                  <p>{{ selectedPlayer.statistics.losses || '-' }}</p>
-                </div>
+                <!-- Contact & Education Card -->
+                <Card class="p-4">
+                  <h3 class="font-semibold text-sm mb-3">Contact & Education</h3>
+                  <div class="space-y-2 text-sm">
+                    <div v-if="selectedPlayer.email" class="flex items-start gap-2">
+                      <span class="text-muted-foreground min-w-16">Email:</span>
+                      <span class="break-all">{{ selectedPlayer.email }}</span>
+                    </div>
+                    <div v-if="selectedPlayer.phoneNumber" class="flex items-start gap-2">
+                      <span class="text-muted-foreground min-w-16">Phone:</span>
+                      <span>{{ selectedPlayer.phoneNumber }}</span>
+                    </div>
+                    <div v-if="selectedPlayer.alumni?.graduationUniversity1" class="flex items-start gap-2">
+                      <span class="text-muted-foreground min-w-16">University:</span>
+                      <span>
+                        {{ selectedPlayer.alumni.graduationUniversity1 }}
+                        <span v-if="selectedPlayer.alumni.graduationYear1" class="text-muted-foreground">
+                          ({{ selectedPlayer.alumni.graduationYear1 }})
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </Card>
               </div>
-            </div>
 
-            <!-- Skills -->
-            <div v-if="selectedPlayer.skills">
-              <h3 class="font-semibold mb-3">Skills</h3>
-              <div class="grid grid-cols-3 gap-4 text-sm">
-                <div v-if="selectedPlayer.skills.forehand">
-                  <span class="text-muted-foreground">Forehand:</span>
-                  <p>{{ selectedPlayer.skills.forehand }}/10</p>
-                </div>
-                <div v-if="selectedPlayer.skills.backhand">
-                  <span class="text-muted-foreground">Backhand:</span>
-                  <p>{{ selectedPlayer.skills.backhand }}/10</p>
-                </div>
-                <div v-if="selectedPlayer.skills.serve">
-                  <span class="text-muted-foreground">Serve:</span>
-                  <p>{{ selectedPlayer.skills.serve }}/10</p>
-                </div>
-              </div>
-              <div v-if="selectedPlayer.skills.strengths" class="mt-4">
-                <span class="text-muted-foreground">Strengths:</span>
-                <p class="mt-1">{{ selectedPlayer.skills.strengths }}</p>
-              </div>
-              <div v-if="selectedPlayer.skills.weaknesses" class="mt-4">
-                <span class="text-muted-foreground">Weaknesses:</span>
-                <p class="mt-1">{{ selectedPlayer.skills.weaknesses }}</p>
+              <!-- Right Column: Skills Radar -->
+              <div class="space-y-4">
+                <Card v-if="selectedPlayer.skills" class="p-4">
+                  <h3 class="font-semibold text-sm mb-4">Skills Profile</h3>
+                  <div class="h-80">
+                    <PlayerSkillsRadar :skills="selectedPlayer.skills" />
+                  </div>
+
+                  <!-- Strengths & Weaknesses -->
+                  <div v-if="selectedPlayer.skills.strengths || selectedPlayer.skills.weaknesses" class="mt-4 space-y-3">
+                    <div v-if="selectedPlayer.skills.strengths" class="text-sm">
+                      <span class="font-medium text-green-600">Strengths:</span>
+                      <p class="mt-1 text-muted-foreground">{{ selectedPlayer.skills.strengths }}</p>
+                    </div>
+                    <div v-if="selectedPlayer.skills.weaknesses" class="text-sm">
+                      <span class="font-medium text-orange-600">Weaknesses:</span>
+                      <p class="mt-1 text-muted-foreground">{{ selectedPlayer.skills.weaknesses }}</p>
+                    </div>
+                  </div>
+                </Card>
+
+                <!-- Placeholder when no skills data -->
+                <Card v-else class="p-4 flex items-center justify-center h-96">
+                  <div class="text-center text-muted-foreground">
+                    <p class="text-sm">No skills data available</p>
+                    <Button @click="editPlayer(selectedPlayer.id)" variant="outline" size="sm" class="mt-4">
+                      Add Skills
+                    </Button>
+                  </div>
+                </Card>
               </div>
             </div>
           </div>
@@ -538,6 +536,7 @@ import PlayerBasicInfo from '../components/PlayerBasicInfo.vue';
 import PlayerSkills from '../components/PlayerSkills.vue';
 import PlayerStatistics from '../components/PlayerStatistics.vue';
 import PlayerAlumni from '../components/PlayerAlumni.vue';
+import PlayerSkillsRadar from '../components/PlayerSkillsRadar.vue';
 
 const router = useRouter();
 const players = ref([]);
