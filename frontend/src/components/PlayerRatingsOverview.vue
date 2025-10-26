@@ -3,10 +3,31 @@
     <h3 class="font-semibold text-sm">All Ratings</h3>
 
     <div class="space-y-3">
-      <!-- UTR Rating -->
+      <!-- Singles UTR Rating -->
+      <div v-if="statistics.singlesUtrRating" class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-muted-foreground">Singles UTR</span>
+          <span v-if="statistics.singlesUtrStatus" class="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+            {{ statistics.singlesUtrStatus }}
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-lg font-bold text-blue-600">{{ statistics.singlesUtrRating.toFixed(2) }}</span>
+          <a
+            v-if="statistics.singlesUtrUrl"
+            :href="statistics.singlesUtrUrl"
+            target="_blank"
+            class="text-primary hover:underline"
+          >
+            <ExternalLink class="h-3 w-3" />
+          </a>
+        </div>
+      </div>
+
+      <!-- Doubles UTR Rating -->
       <div v-if="statistics.utrRating" class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <span class="text-sm text-muted-foreground">UTR</span>
+          <span class="text-sm text-muted-foreground">Doubles UTR</span>
           <span v-if="statistics.utrStatus" class="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
             {{ statistics.utrStatus }}
           </span>
@@ -83,6 +104,6 @@ const props = defineProps({
 
 const hasRatingsData = computed(() => {
   const s = props.statistics || {};
-  return s.utrRating || s.ntrpRating || s.dynamicRating || s.selfRating;
+  return s.singlesUtrRating || s.utrRating || s.ntrpRating || s.dynamicRating || s.selfRating;
 });
 </script>

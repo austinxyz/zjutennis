@@ -232,8 +232,11 @@
                   <div class="flex items-center justify-between gap-2">
                     <h3 class="font-medium text-sm truncate">{{ player.name }}</h3>
                     <div class="flex items-center gap-1 text-xs flex-shrink-0">
-                      <span v-if="player.statistics?.utrRating" class="flex items-center gap-0.5 text-blue-600 font-medium" title="UTR Rating">
-                        <span class="text-[10px]">U</span>{{ player.statistics.utrRating.toFixed(2) }}
+                      <span v-if="player.statistics?.singlesUtrRating" class="flex items-center gap-0.5 text-blue-600 font-medium" title="Singles UTR Rating">
+                        <span class="text-[10px]">SU</span>{{ player.statistics.singlesUtrRating.toFixed(2) }}
+                      </span>
+                      <span v-if="player.statistics?.utrRating" class="flex items-center gap-0.5 text-blue-500 font-medium" title="Doubles UTR Rating">
+                        <span class="text-[10px]">DU</span>{{ player.statistics.utrRating.toFixed(2) }}
                       </span>
                       <span v-if="player.statistics?.ntrpRating" class="flex items-center gap-0.5 text-green-600 font-medium" title="NTRP Rating">
                         <span class="text-[10px]">N</span>{{ player.statistics.ntrpRating.toFixed(1) }}
@@ -603,6 +606,10 @@ const editingSkills = ref({
 });
 
 const editingStatistics = ref({
+  singlesUtrRating: null,
+  singlesUtrStatus: '',
+  singlesUtrUrl: '',
+  singlesUtrUpdatedDate: null,
   utrRating: null,
   utrStatus: '',
   utrUrl: '',
@@ -752,6 +759,7 @@ const editPlayer = (id) => {
       strengths: '', weaknesses: '', notes: ''
     };
     editingStatistics.value = player.statistics ? { ...player.statistics } : {
+      singlesUtrRating: null, singlesUtrStatus: '', singlesUtrUrl: '', singlesUtrUpdatedDate: null,
       utrRating: null, utrStatus: '', utrUrl: '', utrUpdatedDate: null,
       ntrpRating: null, ntrpStatus: '', ntrpUrl: '', dynamicRating: null,
       dynamicRatingUrl: '', selfRating: null, totalMatches: null, wins: null,

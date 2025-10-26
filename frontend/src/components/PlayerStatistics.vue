@@ -5,7 +5,50 @@
       <h3 class="text-lg font-semibold text-foreground mb-4">Rating Systems</h3>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="space-y-2">
-          <Label for="utrRating">UTR Rating</Label>
+          <Label for="singlesUtrRating">Singles UTR Rating</Label>
+          <Input
+            id="singlesUtrRating"
+            v-model.number="localStats.singlesUtrRating"
+            type="number"
+            step="0.01"
+            placeholder="0.00"
+          />
+        </div>
+        <div class="space-y-2">
+          <Label for="singlesUtrStatus">Singles UTR Status</Label>
+          <select
+            id="singlesUtrStatus"
+            v-model="localStats.singlesUtrStatus"
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">Select status</option>
+            <option value="rated">Rated</option>
+            <option value="projected">Projected</option>
+            <option value="unrated">Unrated</option>
+          </select>
+        </div>
+        <div class="space-y-2">
+          <Label for="singlesUtrUrl">Singles UTR URL</Label>
+          <Input
+            id="singlesUtrUrl"
+            v-model="localStats.singlesUtrUrl"
+            type="url"
+            placeholder="https://app.myutr.com/profiles/..."
+          />
+        </div>
+        <div class="space-y-2">
+          <Label for="singlesUtrUpdatedDate">Singles UTR Last Updated</Label>
+          <Input
+            id="singlesUtrUpdatedDate"
+            :value="formatDate(localStats.singlesUtrUpdatedDate)"
+            type="text"
+            disabled
+            placeholder="Not set"
+            class="bg-muted"
+          />
+        </div>
+        <div class="space-y-2">
+          <Label for="utrRating">Doubles UTR Rating</Label>
           <Input
             id="utrRating"
             v-model.number="localStats.utrRating"
@@ -15,7 +58,7 @@
           />
         </div>
         <div class="space-y-2">
-          <Label for="utrStatus">UTR Status</Label>
+          <Label for="utrStatus">Doubles UTR Status</Label>
           <select
             id="utrStatus"
             v-model="localStats.utrStatus"
@@ -28,7 +71,7 @@
           </select>
         </div>
         <div class="space-y-2">
-          <Label for="utrUrl">UTR URL</Label>
+          <Label for="utrUrl">Doubles UTR URL</Label>
           <Input
             id="utrUrl"
             v-model="localStats.utrUrl"
@@ -37,7 +80,7 @@
           />
         </div>
         <div class="space-y-2">
-          <Label for="utrUpdatedDate">UTR Last Updated</Label>
+          <Label for="utrUpdatedDate">Doubles UTR Last Updated</Label>
           <Input
             id="utrUpdatedDate"
             :value="formatDate(localStats.utrUpdatedDate)"

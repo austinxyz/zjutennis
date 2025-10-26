@@ -28,6 +28,20 @@ public class PlayerStatistics {
     private Player player;
 
     // Rating Systems
+    // Singles UTR
+    @Column(name = "singles_utr_rating")
+    private Double singlesUtrRating;
+
+    @Column(name = "singles_utr_status", length = 20)
+    private String singlesUtrStatus; // rated, projected, unrated
+
+    @Column(name = "singles_utr_url", length = 500)
+    private String singlesUtrUrl;
+
+    @Column(name = "singles_utr_updated_date")
+    private LocalDateTime singlesUtrUpdatedDate;
+
+    // Doubles UTR
     @Column(name = "utr_rating")
     private Double utrRating;
 
