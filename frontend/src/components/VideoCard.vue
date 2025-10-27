@@ -39,6 +39,13 @@
         <span>{{ formatDate(video.matchDate) }}</span>
       </div>
 
+      <!-- Player Information -->
+      <div v-if="video.player" class="flex items-center gap-2 text-sm mb-2">
+        <Badge variant="outline">
+          {{ video.player.name }}
+        </Badge>
+      </div>
+
       <p v-if="video.description" class="text-sm text-muted-foreground line-clamp-2 mb-3">
         {{ video.description }}
       </p>
@@ -78,7 +85,7 @@
           class="flex-1"
         >
           <Edit class="w-3 h-3 mr-1" />
-          Edit
+          {{ video.player ? `Analyze: ${video.player.name}` : 'Edit' }}
         </Button>
         <Button
           size="sm"
