@@ -15,6 +15,7 @@ import WinPrediction from '../views/analysis/WinPrediction.vue';
 // Match Analysis Views
 import MatchList from '../views/matches/MatchList.vue';
 import MatchSummary from '../views/matches/MatchSummary.vue';
+import MatchVideoManagement from '../views/matches/MatchVideoManagement.vue';
 
 // Team Composition Views
 import MatchPlanning from '../views/team/MatchPlanning.vue';
@@ -129,6 +130,15 @@ const routes = [
         meta: {
           title: 'Match Records',
           description: 'View and manage match history'
+        }
+      },
+      {
+        path: 'matches/:matchId/videos',
+        name: 'MatchVideoManagement',
+        component: MatchVideoManagement,
+        meta: {
+          title: 'Match Videos',
+          description: 'Manage videos for this match'
         }
       },
       {

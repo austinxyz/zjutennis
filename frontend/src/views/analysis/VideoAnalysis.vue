@@ -128,22 +128,42 @@
       @close="selectedVideo = null"
       @updated="loadVideos"
     />
+
+    <!-- Video Edit Modal -->
+    <div v-if="editingVideo" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="closeEditModal">
+      <Card class="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+          <h2 class="text-2xl font-bold">Edit Video</h2>
+          <Button variant="ghost" size="sm" @click="closeEditModal">
+            <X class="h-5 w-5" />
+          </Button>
+        </div>
+        <VideoUploadForm
+          :video="editingVideo"
+          :is-edit="true"
+          @submit="handleVideoUpdate"
+          @cancel="closeEditModal"
+        />
+      </Card>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { Video, Plus, Sparkles, Clock, Users } from 'lucide-vue-next';
+import { Video, Plus, Sparkles, Clock, Users, X } from 'lucide-vue-next';
 import Card from '../../components/ui/Card.vue';
 import Button from '../../components/ui/Button.vue';
 import VideoCard from '../../components/VideoCard.vue';
 import VideoDetailModal from '../../components/VideoDetailModal.vue';
+import VideoUploadForm from '../../components/VideoUploadForm.vue';
 import videoAnalysisService from '../../services/videoAnalysisService';
 
 const router = useRouter();
 const videos = ref([]);
 const selectedVideo = ref(null);
+const editingVideo = ref(null);
 const loading = ref(true);
 const error = ref(null);
 const selectedPlayerId = ref('');
@@ -213,9 +233,20 @@ const selectVideo = (video) => {
 };
 
 const editVideo = (video) => {
-  // Navigate to player's video page for editing
-  if (video.player?.id) {
-    router.push(`/players/${video.player.id}/videos`);
+  editingVideo.value = video;
+};
+
+const closeEditModal = () => {
+  editingVideo.value = null;
+};
+
+const handleVideoUpdate = async (videoData) => {
+  try {
+    await videoAnalysisService.updateVideo(editingVideo.value.id, videoData);
+    closeEditModal();
+    await loadVideos();
+  } catch (err) {
+    alert('Failed to update video: ' + err.message);
   }
 };
 

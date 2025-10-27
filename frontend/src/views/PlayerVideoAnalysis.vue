@@ -7,24 +7,11 @@
         <p class="text-sm text-muted-foreground mt-1">
           {{ playerName }} - {{ videos.length }} video{{ videos.length !== 1 ? 's' : '' }}
         </p>
-      </div>
-      <div class="flex gap-3">
-        <Button @click="showUploadForm = true">
-          <Plus class="mr-2 h-4 w-4" />
-          Add Video
-        </Button>
+        <p class="text-xs text-muted-foreground mt-1">
+          Videos from matches you participated in
+        </p>
       </div>
     </div>
-
-    <!-- Upload/Edit Form -->
-    <VideoUploadForm
-      v-if="showUploadForm"
-      :video="editingVideo"
-      :is-edit="!!editingVideo"
-      @submit="handleSubmitVideo"
-      @cancel="cancelForm"
-      class="mb-6"
-    />
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-8">
@@ -53,13 +40,9 @@
       <div class="text-center">
         <Video class="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
         <h3 class="text-lg font-semibold mb-2">No Videos Yet</h3>
-        <p class="text-muted-foreground mb-4">
-          Start by adding a match video or training session
+        <p class="text-muted-foreground">
+          Videos will appear here when they are added to matches you participated in
         </p>
-        <Button @click="showUploadForm = true">
-          <Plus class="mr-2 h-4 w-4" />
-          Add First Video
-        </Button>
       </div>
     </div>
 
@@ -76,10 +59,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { Plus, Video } from 'lucide-vue-next';
-import Button from '../components/ui/Button.vue';
+import { Video } from 'lucide-vue-next';
 import VideoCard from '../components/VideoCard.vue';
-import VideoUploadForm from '../components/VideoUploadForm.vue';
 import VideoDetailModal from '../components/VideoDetailModal.vue';
 import videoAnalysisService from '../services/videoAnalysisService';
 import playerService from '../services/playerService';
@@ -91,15 +72,14 @@ const videos = ref([]);
 const selectedVideo = ref(null);
 const loading = ref(true);
 const error = ref(null);
-const showUploadForm = ref(false);
-const editingVideo = ref(null);
 const playerName = ref('');
 
 const loadVideos = async () => {
   try {
     loading.value = true;
     error.value = null;
-    videos.value = await videoAnalysisService.getPlayerVideos(playerId.value);
+    // Get all videos accessible to this player (own videos + match videos)
+    videos.value = await videoAnalysisService.getVideosAccessibleToPlayer(playerId.value);
 
     // Load player name
     const player = await playerService.getPlayerById(playerId.value);
@@ -111,49 +91,8 @@ const loadVideos = async () => {
   }
 };
 
-const handleSubmitVideo = async (videoData) => {
-  try {
-    if (editingVideo.value) {
-      // Update existing video
-      await videoAnalysisService.updateVideo(editingVideo.value.id, videoData);
-    } else {
-      // Create new video
-      await videoAnalysisService.createVideo(playerId.value, videoData);
-    }
-
-    showUploadForm.value = false;
-    editingVideo.value = null;
-    await loadVideos();
-  } catch (err) {
-    alert('Failed to save video: ' + err.message);
-  }
-};
-
-const cancelForm = () => {
-  showUploadForm.value = false;
-  editingVideo.value = null;
-};
-
 const selectVideo = (video) => {
   selectedVideo.value = video;
-};
-
-const editVideo = (video) => {
-  editingVideo.value = video;
-  showUploadForm.value = true;
-};
-
-const deleteVideo = async (video) => {
-  if (!confirm(`Are you sure you want to delete "${video.title}"?`)) {
-    return;
-  }
-
-  try {
-    await videoAnalysisService.deleteVideo(video.id);
-    await loadVideos();
-  } catch (err) {
-    alert('Failed to delete video: ' + err.message);
-  }
 };
 
 onMounted(() => {
