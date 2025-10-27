@@ -49,4 +49,19 @@ public interface VideoAnalysisRepository extends JpaRepository<VideoAnalysis, Lo
      */
     @Query("SELECT COUNT(v) FROM VideoAnalysis v WHERE v.player.id = :playerId AND v.aiAnalyzed = true")
     long countAnalyzedVideosByPlayerId(@Param("playerId") Long playerId);
+
+    /**
+     * Find all videos for a specific match
+     */
+    List<VideoAnalysis> findByMatchIdOrderByUploadDateDesc(Long matchId);
+
+    /**
+     * Find all videos accessible to a player (their own videos + videos from matches they participated in)
+     */
+    @Query("SELECT DISTINCT v FROM VideoAnalysis v " +
+           "LEFT JOIN v.match m " +
+           "WHERE v.player.id = :playerId " +
+           "OR (v.match IS NOT NULL AND (m.player1.id = :playerId OR m.player2.id = :playerId OR m.opponentPlayer1.id = :playerId OR m.opponentPlayer2.id = :playerId)) " +
+           "ORDER BY v.matchDate DESC")
+    List<VideoAnalysis> findVideosAccessibleToPlayer(@Param("playerId") Long playerId);
 }

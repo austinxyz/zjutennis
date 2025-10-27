@@ -1,5 +1,6 @@
 package com.zjutennis.controller;
 
+import com.zjutennis.dto.VideoAnalysisRequest;
 import com.zjutennis.model.VideoAnalysis;
 import com.zjutennis.service.VideoAnalysisService;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -69,10 +71,10 @@ public class VideoAnalysisController {
     @PostMapping("/player/{playerId}")
     public ResponseEntity<VideoAnalysis> createVideo(
             @PathVariable Long playerId,
-            @RequestBody VideoAnalysis videoAnalysis) {
+            @RequestBody VideoAnalysisRequest request) {
         log.info("POST /api/video-analysis/player/{} - Creating new video", playerId);
         try {
-            VideoAnalysis created = videoAnalysisService.createVideo(playerId, videoAnalysis);
+            VideoAnalysis created = videoAnalysisService.createVideo(playerId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (RuntimeException e) {
             log.error("Error creating video for player {}: {}", playerId, e.getMessage());
@@ -186,5 +188,62 @@ public class VideoAnalysisController {
             log.error("Error analyzing video {}: {}", id, e.getMessage());
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    /**
+     * Upload and import analysis data from CSV file
+     * POST /api/video-analysis/{id}/import-csv
+     */
+    @PostMapping("/{id}/import-csv")
+    public ResponseEntity<Map<String, Object>> importCSV(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        log.info("POST /api/video-analysis/{}/import-csv - Importing CSV", id);
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "File is empty"));
+            }
+
+            if (!file.getOriginalFilename().toLowerCase().endsWith(".csv")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "File must be a CSV"));
+            }
+
+            // Read CSV content
+            String csvContent = new String(file.getBytes());
+
+            // Return CSV content for frontend processing
+            // Frontend will parse and submit via updateAIAnalysis endpoint
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("csvContent", csvContent);
+            response.put("filename", file.getOriginalFilename());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error importing CSV for video {}: {}", id, e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Get all videos accessible to a player (own videos + match videos)
+     * GET /api/video-analysis/player/{playerId}/accessible
+     */
+    @GetMapping("/player/{playerId}/accessible")
+    public ResponseEntity<List<VideoAnalysis>> getVideosAccessibleToPlayer(@PathVariable Long playerId) {
+        log.info("GET /api/video-analysis/player/{}/accessible - Fetching accessible videos", playerId);
+        List<VideoAnalysis> videos = videoAnalysisService.getVideosAccessibleToPlayer(playerId);
+        return ResponseEntity.ok(videos);
+    }
+
+    /**
+     * Get all videos for a specific match
+     * GET /api/video-analysis/match/{matchId}
+     */
+    @GetMapping("/match/{matchId}")
+    public ResponseEntity<List<VideoAnalysis>> getVideosByMatch(@PathVariable Long matchId) {
+        log.info("GET /api/video-analysis/match/{} - Fetching videos for match", matchId);
+        List<VideoAnalysis> videos = videoAnalysisService.getVideosByMatch(matchId);
+        return ResponseEntity.ok(videos);
     }
 }

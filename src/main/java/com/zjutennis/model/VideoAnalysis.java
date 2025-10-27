@@ -11,9 +11,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Entity representing video analysis for a player's match
+ * Entity representing video analysis for a SPECIFIC PLAYER's performance
+ * Each video analysis focuses on analyzing ONE player, even if the match/video includes multiple players
+ * The 'player' field indicates whose performance is being analyzed
+ * The 'match' field (optional) links to the match where this video was recorded
  * Supports both uploaded videos and external links (YouTube, etc.)
- * Includes AI-generated analysis of strengths, weaknesses, and tactics
+ * Includes AI-generated analysis of strengths, weaknesses, and tactics for the specified player
  */
 @Entity
 @Table(name = "video_analysis")
@@ -29,6 +32,11 @@ public class VideoAnalysis {
     @JoinColumn(name = "player_id", nullable = false)
     @JsonBackReference("player-videos")
     private Player player;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "match_id")
+    @JsonBackReference("match-videos")
+    private Match match;
 
     // Video Information
     @Column(name = "title", nullable = false, length = 200)
@@ -81,7 +89,7 @@ public class VideoAnalysis {
     @Column(name = "ai_analysis_date")
     private LocalDateTime aiAnalysisDate;
 
-    // Strengths Analysis (0-10 scale)
+    // Strengths Analysis (0-5 scale)
     @Column(name = "strength_forehand_score")
     private Double strengthForehandScore;
 
@@ -97,7 +105,7 @@ public class VideoAnalysis {
     @Column(name = "strength_summary", columnDefinition = "TEXT")
     private String strengthSummary; // AI-generated text summary
 
-    // Weaknesses Analysis (0-10 scale, higher = more issues)
+    // Weaknesses Analysis (0-5 scale, higher = more issues)
     @Column(name = "weakness_backhand_score")
     private Double weaknessBackhandScore;
 

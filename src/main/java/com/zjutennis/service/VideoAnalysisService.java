@@ -1,7 +1,9 @@
 package com.zjutennis.service;
 
+import com.zjutennis.model.Match;
 import com.zjutennis.model.Player;
 import com.zjutennis.model.VideoAnalysis;
+import com.zjutennis.repository.MatchRepository;
 import com.zjutennis.repository.PlayerRepository;
 import com.zjutennis.repository.VideoAnalysisRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,9 @@ public class VideoAnalysisService {
 
     @Autowired
     private PlayerRepository playerRepository;
+
+    @Autowired
+    private MatchRepository matchRepository;
 
     /**
      * Get all videos across all players
@@ -54,16 +59,36 @@ public class VideoAnalysisService {
      * Create a new video analysis entry
      */
     @Transactional
-    public VideoAnalysis createVideo(Long playerId, VideoAnalysis videoAnalysis) {
+    public VideoAnalysis createVideo(Long playerId, com.zjutennis.dto.VideoAnalysisRequest request) {
         log.debug("Creating new video for player ID: {}", playerId);
 
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new RuntimeException("Player not found with id: " + playerId));
 
+        VideoAnalysis videoAnalysis = new VideoAnalysis();
         videoAnalysis.setPlayer(player);
+        videoAnalysis.setTitle(request.getTitle());
+        videoAnalysis.setDescription(request.getDescription());
+        videoAnalysis.setVideoUrl(request.getVideoUrl());
+        videoAnalysis.setThumbnailUrl(request.getThumbnailUrl());
+        videoAnalysis.setMatchDate(request.getMatchDate());
+        videoAnalysis.setDurationSeconds(request.getDurationSeconds());
+        videoAnalysis.setTotalShots(request.getTotalShots());
+        videoAnalysis.setErrors(request.getErrors());
+        videoAnalysis.setWinners(request.getWinners());
+        videoAnalysis.setAces(request.getAces());
+        videoAnalysis.setDoubleFaults(request.getDoubleFaults());
+        videoAnalysis.setRunningDistanceMeters(request.getRunningDistanceMeters());
         videoAnalysis.setUploadDate(LocalDateTime.now());
         videoAnalysis.setStatus("pending");
         videoAnalysis.setAiAnalyzed(false);
+
+        // Link to match if provided
+        if (request.getMatchId() != null) {
+            Match match = matchRepository.findById(request.getMatchId())
+                    .orElseThrow(() -> new RuntimeException("Match not found with id: " + request.getMatchId()));
+            videoAnalysis.setMatch(match);
+        }
 
         return videoAnalysisRepository.save(videoAnalysis);
     }
@@ -230,5 +255,22 @@ public class VideoAnalysisService {
                     return videoAnalysisRepository.save(video);
                 })
                 .orElseThrow(() -> new RuntimeException("Video not found with id: " + id));
+    }
+
+    /**
+     * Get all videos accessible to a player
+     * This includes videos uploaded by the player and videos from matches they participated in
+     */
+    public List<VideoAnalysis> getVideosAccessibleToPlayer(Long playerId) {
+        log.debug("Fetching all videos accessible to player ID: {}", playerId);
+        return videoAnalysisRepository.findVideosAccessibleToPlayer(playerId);
+    }
+
+    /**
+     * Get all videos for a specific match
+     */
+    public List<VideoAnalysis> getVideosByMatch(Long matchId) {
+        log.debug("Fetching all videos for match ID: {}", matchId);
+        return videoAnalysisRepository.findByMatchIdOrderByUploadDateDesc(matchId);
     }
 }
