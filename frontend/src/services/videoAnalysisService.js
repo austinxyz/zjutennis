@@ -113,6 +113,43 @@ class VideoAnalysisService {
     const response = await axios.post(`${API_URL}/${id}/analyze`);
     return response.data;
   }
+
+  /**
+   * Import analysis data from CSV file
+   * @param {number} id - Video ID
+   * @param {File} file - CSV file
+   * @returns {Promise<Object>} Response with CSV content
+   */
+  async importCSV(id, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await axios.post(`${API_URL}/${id}/import-csv`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  }
+
+  /**
+   * Get all videos accessible to a player (own videos + match videos)
+   * @param {number} playerId - Player ID
+   * @returns {Promise<Array>} List of accessible videos
+   */
+  async getVideosAccessibleToPlayer(playerId) {
+    const response = await axios.get(`${API_URL}/player/${playerId}/accessible`);
+    return response.data;
+  }
+
+  /**
+   * Get all videos for a specific match
+   * @param {number} matchId - Match ID
+   * @returns {Promise<Array>} List of videos for the match
+   */
+  async getVideosByMatch(matchId) {
+    const response = await axios.get(`${API_URL}/match/${matchId}`);
+    return response.data;
+  }
 }
 
 export default new VideoAnalysisService();
