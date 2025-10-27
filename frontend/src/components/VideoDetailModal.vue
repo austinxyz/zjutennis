@@ -136,9 +136,20 @@
           <p class="text-sm text-muted-foreground mb-4">
             This video hasn't been analyzed yet
           </p>
-          <Badge :variant="getStatusVariant(video.status)">
-            {{ video.status }}
-          </Badge>
+          <div class="flex gap-3 justify-center items-center">
+            <Badge :variant="getStatusVariant(video.status)">
+              {{ video.status }}
+            </Badge>
+            <Button
+              v-if="video.status !== 'processing'"
+              @click="triggerAIAnalysis"
+              :disabled="analyzing"
+              size="sm"
+            >
+              <Sparkles class="w-4 h-4 mr-2" />
+              {{ analyzing ? 'Analyzing...' : 'Analyze with AI' }}
+            </Button>
+          </div>
         </div>
       </div>
     </Card>
@@ -146,11 +157,12 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { X, ExternalLink, TrendingUp, TrendingDown, Target, Lightbulb, Sparkles } from 'lucide-vue-next';
 import Card from './ui/Card.vue';
 import Button from './ui/Button.vue';
 import Badge from './ui/Badge.vue';
+import videoAnalysisService from '../services/videoAnalysisService';
 
 const props = defineProps({
   video: {
@@ -159,7 +171,21 @@ const props = defineProps({
   }
 });
 
-defineEmits(['close', 'updated']);
+const emit = defineEmits(['close', 'updated']);
+
+const analyzing = ref(false);
+
+const triggerAIAnalysis = async () => {
+  try {
+    analyzing.value = true;
+    await videoAnalysisService.analyzeVideo(props.video.id);
+    emit('updated'); // Refresh the video data
+  } catch (err) {
+    alert('Failed to analyze video: ' + err.message);
+  } finally {
+    analyzing.value = false;
+  }
+};
 
 const hasMatchStats = computed(() => {
   return props.video.totalShots || props.video.winners || props.video.errors ||

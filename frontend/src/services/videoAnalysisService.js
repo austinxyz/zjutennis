@@ -103,6 +103,16 @@ class VideoAnalysisService {
     const response = await axios.put(`${API_URL}/${id}/ai-analysis`, aiResults);
     return response.data;
   }
+
+  /**
+   * Trigger AI analysis for a video
+   * @param {number} id - Video ID
+   * @returns {Promise<Object>} Analyzed video object
+   */
+  async analyzeVideo(id) {
+    const response = await axios.post(`${API_URL}/${id}/analyze`);
+    return response.data;
+  }
 }
 
 export default new VideoAnalysisService();

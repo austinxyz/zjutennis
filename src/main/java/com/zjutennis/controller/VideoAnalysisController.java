@@ -25,6 +25,9 @@ public class VideoAnalysisController {
     @Autowired
     private VideoAnalysisService videoAnalysisService;
 
+    @Autowired
+    private com.zjutennis.service.AIAnalysisService aiAnalysisService;
+
     /**
      * Get all videos across all players
      * GET /api/video-analysis
@@ -166,6 +169,22 @@ public class VideoAnalysisController {
         } catch (RuntimeException e) {
             log.error("Error updating AI analysis for video {}: {}", id, e.getMessage());
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Trigger AI analysis for a video
+     * POST /api/video-analysis/{id}/analyze
+     */
+    @PostMapping("/{id}/analyze")
+    public ResponseEntity<VideoAnalysis> analyzeVideo(@PathVariable Long id) {
+        log.info("POST /api/video-analysis/{}/analyze - Triggering AI analysis", id);
+        try {
+            VideoAnalysis analyzed = aiAnalysisService.analyzeVideo(id);
+            return ResponseEntity.ok(analyzed);
+        } catch (RuntimeException e) {
+            log.error("Error analyzing video {}: {}", id, e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 }
