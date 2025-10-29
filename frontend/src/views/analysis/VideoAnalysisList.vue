@@ -99,10 +99,10 @@
           </Card>
 
           <!-- Selected Video Details -->
-          <Card v-else>
-            <CardContent class="pt-6">
-              <!-- Video Basic Information Section -->
-              <div class="mb-6 pb-6 border-b border-border">
+          <Card v-else class="h-[calc(100vh-200px)]">
+            <CardContent class="pt-6 h-full flex flex-col">
+              <!-- Video Basic Information Section (Top) -->
+              <div class="mb-4 pb-4 border-b border-border flex-shrink-0">
                 <div class="flex justify-between items-center mb-4">
                   <h4 class="font-semibold text-lg">Video Information</h4>
                   <div v-if="!editingVideoInfo" class="flex gap-2">
@@ -110,10 +110,11 @@
                       v-if="selectedVideo.videoUrl"
                       size="sm"
                       variant="default"
-                      @click="watchVideo"
+                      @click="showVideoPlayer = true"
                       title="Watch Video"
                     >
-                      <Video class="w-4 h-4" />
+                      <Video class="w-4 h-4 mr-2" />
+                      Watch Video
                     </Button>
                     <Button
                       size="sm"
@@ -226,11 +227,11 @@
               </div>
 
               <!-- Player Analyses Section -->
-              <div>
+              <div class="flex-1 min-h-0 flex flex-col">
                 <!-- Tabs for existing analyses -->
-                <div v-if="selectedVideoAnalyses.length > 0 && !addingNewAnalysis">
+                <div v-if="selectedVideoAnalyses.length > 0 && !addingNewAnalysis" class="flex flex-col flex-1 min-h-0">
                   <!-- Tab Headers with Add Button -->
-                  <div class="flex justify-between items-center mb-4 border-b border-border">
+                  <div class="flex justify-between items-center mb-4 border-b border-border flex-shrink-0">
                     <div class="flex gap-2 overflow-x-auto">
                       <button
                         v-for="(analysis, index) in selectedVideoAnalyses"
@@ -259,7 +260,7 @@
                   </div>
 
                   <!-- Tab Content - View or Edit Mode -->
-                  <div v-if="selectedAnalysis">
+                  <div v-if="selectedAnalysis" class="flex-1 min-h-0 overflow-y-auto">
                     <!-- View Mode -->
                     <div v-if="editingAnalysis?.id !== selectedAnalysis.id">
                       <AnalysisCard
@@ -270,7 +271,7 @@
                     </div>
 
                     <!-- Edit Mode -->
-                    <div v-else class="space-y-4">
+                    <div v-else>
                       <AnalysisEditForm
                         :analysis="analysisForm"
                         :available-players="availablePlayers"
@@ -282,7 +283,7 @@
                 </div>
 
                 <!-- Add New Analysis Form -->
-                <div v-else-if="addingNewAnalysis">
+                <div v-else-if="addingNewAnalysis" class="flex-1 min-h-0 overflow-y-auto">
                   <AnalysisEditForm
                     :analysis="analysisForm"
                     :is-new="true"
@@ -309,6 +310,65 @@
         </div>
       </div>
     </template>
+
+    <!-- Floating Video Player Modal -->
+    <div
+      v-if="showVideoPlayer && selectedVideo?.videoUrl"
+      ref="videoPlayerRef"
+      class="fixed bg-background rounded-lg shadow-2xl border-2 border-primary/20 z-50 resize-container"
+      :style="{
+        left: videoPlayerPosition.x + 'px',
+        top: videoPlayerPosition.y + 'px',
+        width: videoPlayerSize.width + 'px',
+        height: videoPlayerSize.height + 'px'
+      }"
+    >
+      <!-- Modal Header -->
+      <div
+        class="flex justify-between items-center p-3 border-b bg-muted/50 rounded-t-lg cursor-move"
+        @mousedown="startDrag"
+      >
+        <h3 class="font-semibold text-sm">{{ selectedVideo.description || 'Video Player' }}</h3>
+        <div class="flex gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            @click="resetSize"
+            @mousedown.stop
+            title="Reset size"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            @click="showVideoPlayer = false"
+            @mousedown.stop
+            title="Close video player"
+          >
+            <X class="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+      <!-- Video Player -->
+      <div class="bg-black rounded-b-lg overflow-hidden" style="height: calc(100% - 53px);">
+        <iframe
+          :src="getEmbedUrl(selectedVideo.videoUrl)"
+          class="w-full h-full"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+      <!-- Resize Handles -->
+      <div
+        class="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize"
+        @mousedown.stop="startResize"
+        style="background: linear-gradient(135deg, transparent 50%, rgba(59, 130, 246, 0.5) 50%);"
+      ></div>
+    </div>
   </div>
 </template>
 
@@ -323,7 +383,7 @@ import Input from '../../components/ui/Input.vue';
 import Label from '../../components/ui/Label.vue';
 import AnalysisCard from '../../components/AnalysisCard.vue';
 import AnalysisEditForm from '../../components/AnalysisEditForm.vue';
-import { Video, Clock, Users, ExternalLink, ArrowLeft, Plus, Edit2 } from 'lucide-vue-next';
+import { Video, Clock, Users, ExternalLink, ArrowLeft, Plus, Edit2, X } from 'lucide-vue-next';
 import videoService from '../../services/videoService';
 import videoAnalysisService from '../../services/videoAnalysisService';
 import playerService from '../../services/playerService';
@@ -340,6 +400,14 @@ const editingAnalysis = ref(null);
 const addingNewAnalysis = ref(false);
 const loading = ref(true);
 const error = ref(null);
+const showVideoPlayer = ref(false);
+const videoPlayerRef = ref(null);
+const videoPlayerPosition = ref({ x: 100, y: 100 });
+const videoPlayerSize = ref({ width: 600, height: 390 }); // 16:9 ratio + header
+const isDragging = ref(false);
+const isResizing = ref(false);
+const dragOffset = ref({ x: 0, y: 0 });
+const resizeStart = ref({ x: 0, y: 0, width: 0, height: 0 });
 
 const videoForm = ref({
   description: '',
@@ -466,6 +534,28 @@ const watchVideo = () => {
   if (selectedVideo.value?.videoUrl) {
     window.open(selectedVideo.value.videoUrl, '_blank');
   }
+};
+
+const getEmbedUrl = (url) => {
+  if (!url) return '';
+
+  // YouTube URL conversion
+  if (url.includes('youtube.com/watch')) {
+    const videoId = url.split('v=')[1]?.split('&')[0];
+    return `https://www.youtube.com/embed/${videoId}`;
+  } else if (url.includes('youtu.be/')) {
+    const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    return `https://www.youtube.com/embed/${videoId}`;
+  }
+
+  // Vimeo URL conversion
+  if (url.includes('vimeo.com/')) {
+    const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
+    return `https://player.vimeo.com/video/${videoId}`;
+  }
+
+  // If already an embed URL or unknown format, return as is
+  return url;
 };
 
 // Video Info Edit Functions
@@ -596,6 +686,76 @@ const deleteAnalysis = async (analysisId) => {
     console.error('Error deleting analysis:', err);
     alert('Failed to delete analysis: ' + err.message);
   }
+};
+
+// Drag functionality for video player
+const startDrag = (e) => {
+  // Only drag from header, not the video itself
+  if (e.target.tagName === 'IFRAME') return;
+
+  isDragging.value = true;
+  dragOffset.value = {
+    x: e.clientX - videoPlayerPosition.value.x,
+    y: e.clientY - videoPlayerPosition.value.y
+  };
+
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', stopDrag);
+};
+
+const onDrag = (e) => {
+  if (!isDragging.value) return;
+
+  videoPlayerPosition.value = {
+    x: e.clientX - dragOffset.value.x,
+    y: e.clientY - dragOffset.value.y
+  };
+};
+
+const stopDrag = () => {
+  isDragging.value = false;
+  document.removeEventListener('mousemove', onDrag);
+  document.removeEventListener('mouseup', stopDrag);
+};
+
+// Resize functionality for video player
+const startResize = (e) => {
+  isResizing.value = true;
+  resizeStart.value = {
+    x: e.clientX,
+    y: e.clientY,
+    width: videoPlayerSize.value.width,
+    height: videoPlayerSize.value.height
+  };
+
+  document.addEventListener('mousemove', onResize);
+  document.addEventListener('mouseup', stopResize);
+};
+
+const onResize = (e) => {
+  if (!isResizing.value) return;
+
+  const deltaX = e.clientX - resizeStart.value.x;
+  const deltaY = e.clientY - resizeStart.value.y;
+
+  // Set minimum size
+  const minWidth = 400;
+  const minHeight = 300;
+
+  videoPlayerSize.value = {
+    width: Math.max(minWidth, resizeStart.value.width + deltaX),
+    height: Math.max(minHeight, resizeStart.value.height + deltaY)
+  };
+};
+
+const stopResize = () => {
+  isResizing.value = false;
+  document.removeEventListener('mousemove', onResize);
+  document.removeEventListener('mouseup', stopResize);
+};
+
+const resetSize = () => {
+  videoPlayerSize.value = { width: 600, height: 390 };
 };
 
 onMounted(() => {

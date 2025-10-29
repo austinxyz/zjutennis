@@ -1,18 +1,7 @@
 <template>
   <Card class="hover:shadow-md transition-shadow">
     <CardContent class="pt-4">
-      <div class="flex justify-between items-start mb-3">
-        <div class="flex items-center gap-2">
-          <Badge variant="outline" class="font-medium">
-            {{ analysis.playerName }}
-          </Badge>
-          <Badge :variant="getStatusVariant(analysis.status)">
-            {{ analysis.status }}
-          </Badge>
-          <Badge v-if="analysis.aiAnalyzed" variant="success" size="sm">
-            AI Analyzed
-          </Badge>
-        </div>
+      <div class="flex justify-end items-start mb-3">
         <div class="flex gap-2">
           <Button
             size="sm"
@@ -85,29 +74,10 @@
         </p>
       </div>
 
-      <!-- AI Recommendations -->
-      <div v-if="analysis.aiRecommendations" class="mb-2">
-        <h4 class="text-xs font-semibold text-purple-700 mb-1">AI Recommendations</h4>
-        <p class="text-xs text-muted-foreground line-clamp-2">
-          {{ analysis.aiRecommendations }}
-        </p>
-      </div>
-
-      <!-- Training Focus Areas -->
-      <div v-if="analysis.trainingFocusAreas" class="mb-2">
-        <h4 class="text-xs font-semibold text-orange-700 mb-1">Training Focus</h4>
-        <p class="text-xs text-muted-foreground line-clamp-2">
-          {{ analysis.trainingFocusAreas }}
-        </p>
-      </div>
-
       <!-- Timestamps -->
-      <div class="flex items-center gap-3 text-xs text-muted-foreground pt-2 border-t">
-        <div v-if="analysis.createdAt">
+      <div v-if="analysis.createdAt" class="flex items-center gap-3 text-xs text-muted-foreground pt-2 border-t">
+        <div>
           Created: {{ formatDate(analysis.createdAt) }}
-        </div>
-        <div v-if="analysis.aiAnalyzed && analysis.aiAnalysisDate">
-          AI Analyzed: {{ formatDate(analysis.aiAnalysisDate) }}
         </div>
       </div>
 
@@ -158,20 +128,8 @@ const hasTacticalData = computed(() => {
 const hasAnyData = computed(() => {
   return hasStrengthData.value ||
     hasWeaknessData.value ||
-    hasTacticalData.value ||
-    props.analysis.aiRecommendations ||
-    props.analysis.trainingFocusAreas;
+    hasTacticalData.value;
 });
-
-const getStatusVariant = (status) => {
-  const statusMap = {
-    'pending': 'secondary',
-    'processing': 'warning',
-    'completed': 'success',
-    'failed': 'destructive'
-  };
-  return statusMap[status] || 'secondary';
-};
 
 const formatDate = (dateString) => {
   if (!dateString) return '';

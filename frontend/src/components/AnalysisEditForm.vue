@@ -25,46 +25,46 @@
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <Label for="forehand">Forehand Score (0-10)</Label>
+          <Label for="forehand">Forehand Score (1-5)</Label>
           <Input
             id="forehand"
             type="number"
             step="0.1"
-            min="0"
-            max="10"
+            min="1"
+            max="5"
             v-model.number="formData.strengthForehandScore"
           />
         </div>
         <div>
-          <Label for="serve">Serve Score (0-10)</Label>
+          <Label for="serve">Serve Score (1-5)</Label>
           <Input
             id="serve"
             type="number"
             step="0.1"
-            min="0"
-            max="10"
+            min="1"
+            max="5"
             v-model.number="formData.strengthServeScore"
           />
         </div>
         <div>
-          <Label for="volley">Volley Score (0-10)</Label>
+          <Label for="volley">Volley Score (1-5)</Label>
           <Input
             id="volley"
             type="number"
             step="0.1"
-            min="0"
-            max="10"
+            min="1"
+            max="5"
             v-model.number="formData.strengthVolleyScore"
           />
         </div>
         <div>
-          <Label for="movement">Movement Score (0-10)</Label>
+          <Label for="movement">Movement Score (1-5)</Label>
           <Input
             id="movement"
             type="number"
             step="0.1"
-            min="0"
-            max="10"
+            min="1"
+            max="5"
             v-model.number="formData.strengthMovementScore"
           />
         </div>
@@ -87,35 +87,35 @@
 
       <div class="grid grid-cols-3 gap-4">
         <div>
-          <Label for="backhand">Backhand Score (0-10)</Label>
+          <Label for="backhand">Backhand Score (1-5)</Label>
           <Input
             id="backhand"
             type="number"
             step="0.1"
-            min="0"
-            max="10"
+            min="1"
+            max="5"
             v-model.number="formData.weaknessBackhandScore"
           />
         </div>
         <div>
-          <Label for="consistency">Consistency Score (0-10)</Label>
+          <Label for="consistency">Consistency Score (1-5)</Label>
           <Input
             id="consistency"
             type="number"
             step="0.1"
-            min="0"
-            max="10"
+            min="1"
+            max="5"
             v-model.number="formData.weaknessConsistencyScore"
           />
         </div>
         <div>
-          <Label for="pressure">Under Pressure Score (0-10)</Label>
+          <Label for="pressure">Under Pressure Score (1-5)</Label>
           <Input
             id="pressure"
             type="number"
             step="0.1"
-            min="0"
-            max="10"
+            min="1"
+            max="5"
             v-model.number="formData.weaknessPressureScore"
           />
         </div>
@@ -193,30 +193,6 @@
           v-model="formData.tacticalSummary"
           rows="3"
           placeholder="Describe the player's tactical approach..."
-        />
-      </div>
-    </div>
-
-    <!-- Recommendations Section -->
-    <div class="space-y-4">
-      <h5 class="font-semibold text-md border-b pb-2">Recommendations</h5>
-
-      <div>
-        <Label for="recommendations">AI Recommendations</Label>
-        <Textarea
-          id="recommendations"
-          v-model="formData.aiRecommendations"
-          rows="4"
-          placeholder="Training recommendations and suggestions..."
-        />
-      </div>
-
-      <div>
-        <Label for="trainingFocus">Training Focus Areas</Label>
-        <Input
-          id="trainingFocus"
-          v-model="formData.trainingFocusAreas"
-          placeholder="e.g., Backhand technique, Net play, Mental toughness"
         />
       </div>
     </div>
