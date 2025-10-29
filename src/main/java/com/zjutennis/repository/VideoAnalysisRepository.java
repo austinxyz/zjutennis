@@ -2,11 +2,10 @@ package com.zjutennis.repository;
 
 import com.zjutennis.model.VideoAnalysis;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository for VideoAnalysis entity
@@ -15,53 +14,66 @@ import java.util.List;
 public interface VideoAnalysisRepository extends JpaRepository<VideoAnalysis, Long> {
 
     /**
-     * Find all videos across all players ordered by match date
+     * Find all analyses for a specific video
+     * @param videoId Video ID
+     * @return List of analyses
      */
-    List<VideoAnalysis> findAllByOrderByMatchDateDesc();
+    List<VideoAnalysis> findByVideoId(Long videoId);
 
     /**
-     * Find all videos for a specific player
+     * Find all analyses for a specific player
+     * @param playerId Player ID
+     * @return List of analyses
      */
-    List<VideoAnalysis> findByPlayerIdOrderByMatchDateDesc(Long playerId);
+    List<VideoAnalysis> findByPlayerId(Long playerId);
 
     /**
-     * Find all videos for a specific player with a specific status
+     * Find analysis for a specific video and player
+     * @param videoId Video ID
+     * @param playerId Player ID
+     * @return Optional VideoAnalysis
      */
-    List<VideoAnalysis> findByPlayerIdAndStatus(Long playerId, String status);
+    Optional<VideoAnalysis> findByVideoIdAndPlayerId(Long videoId, Long playerId);
 
     /**
-     * Find all analyzed videos for a player
+     * Check if analysis exists for video and player
+     * @param videoId Video ID
+     * @param playerId Player ID
+     * @return true if exists
      */
-    List<VideoAnalysis> findByPlayerIdAndAiAnalyzedTrue(Long playerId);
+    boolean existsByVideoIdAndPlayerId(Long videoId, Long playerId);
 
     /**
-     * Find pending videos that need AI analysis
+     * Delete all analyses for a specific video
+     * @param videoId Video ID
      */
-    List<VideoAnalysis> findByAiAnalyzedFalseAndStatus(String status);
+    void deleteByVideoId(Long videoId);
 
     /**
-     * Count total videos for a player
+     * Delete all analyses for a specific player
+     * @param playerId Player ID
+     */
+    void deleteByPlayerId(Long playerId);
+
+    /**
+     * Count analyses for a specific video
+     * @param videoId Video ID
+     * @return Count
+     */
+    long countByVideoId(Long videoId);
+
+    /**
+     * Count analyses for a specific player
+     * @param playerId Player ID
+     * @return Count
      */
     long countByPlayerId(Long playerId);
 
     /**
-     * Count analyzed videos for a player
+     * Find all AI-analyzed videos for a player
+     * @param playerId Player ID
+     * @param aiAnalyzed AI analyzed status
+     * @return List of analyses
      */
-    @Query("SELECT COUNT(v) FROM VideoAnalysis v WHERE v.player.id = :playerId AND v.aiAnalyzed = true")
-    long countAnalyzedVideosByPlayerId(@Param("playerId") Long playerId);
-
-    /**
-     * Find all videos for a specific match
-     */
-    List<VideoAnalysis> findByMatchIdOrderByUploadDateDesc(Long matchId);
-
-    /**
-     * Find all videos accessible to a player (their own videos + videos from matches they participated in)
-     */
-    @Query("SELECT DISTINCT v FROM VideoAnalysis v " +
-           "LEFT JOIN v.match m " +
-           "WHERE v.player.id = :playerId " +
-           "OR (v.match IS NOT NULL AND (m.player1.id = :playerId OR m.player2.id = :playerId OR m.opponentPlayer1.id = :playerId OR m.opponentPlayer2.id = :playerId)) " +
-           "ORDER BY v.matchDate DESC")
-    List<VideoAnalysis> findVideosAccessibleToPlayer(@Param("playerId") Long playerId);
+    List<VideoAnalysis> findByPlayerIdAndAiAnalyzed(Long playerId, Boolean aiAnalyzed);
 }

@@ -13,6 +13,26 @@
       </Button>
     </div>
 
+    <!-- Search Bar -->
+    <div class="flex gap-2">
+      <Input
+        v-model="playerNameFilter"
+        placeholder="Search by player name..."
+        class="max-w-md"
+      >
+        <template #prefix>
+          <Search class="h-4 h-4 text-muted-foreground" />
+        </template>
+      </Input>
+      <Button
+        v-if="playerNameFilter"
+        variant="outline"
+        @click="clearFilter"
+      >
+        Clear
+      </Button>
+    </div>
+
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4" v-if="statistics">
       <Card>
@@ -58,11 +78,10 @@
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead>Tournament</TableHead>
-              <TableHead>Round</TableHead>
+              <TableHead>Team 1 (Our Team)</TableHead>
+              <TableHead>Team 2 (Opponent)</TableHead>
               <TableHead>Score</TableHead>
               <TableHead>Result</TableHead>
-              <TableHead>Winner</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -70,17 +89,52 @@
             <TableRow v-for="match in matches" :key="match.id">
               <TableCell>{{ formatDate(match.matchTime) }}</TableCell>
               <TableCell>
-                <Badge>{{ match.matchType }}</Badge>
+                <Badge>{{ formatMatchType(match.matchType) }}</Badge>
               </TableCell>
-              <TableCell>{{ match.tournamentName || 'N/A' }}</TableCell>
-              <TableCell>{{ match.round || 'N/A' }}</TableCell>
+              <TableCell>
+                <div class="flex items-center gap-2">
+                  <div>
+                    <div>
+                      <router-link
+                        v-if="match.player1?.id"
+                        :to="{ path: '/players', query: { name: match.player1Name } }"
+                        class="text-primary hover:underline cursor-pointer"
+                      >
+                        {{ match.player1Name }}
+                      </router-link>
+                      <span v-else>{{ match.player1Name || 'N/A' }}</span>
+                    </div>
+                    <div v-if="match.matchType === 'doubles' && match.player2Name" class="text-sm text-muted-foreground">
+                      <router-link
+                        v-if="match.player2?.id"
+                        :to="{ path: '/players', query: { name: match.player2Name } }"
+                        class="text-primary hover:underline cursor-pointer"
+                      >
+                        {{ match.player2Name }}
+                      </router-link>
+                      <span v-else>{{ match.player2Name }}</span>
+                    </div>
+                  </div>
+                  <Trophy v-if="match.winnerSide === 'team1'" class="w-4 h-4 text-yellow-500" title="Winner" />
+                </div>
+              </TableCell>
+              <TableCell>
+                <div class="flex items-center gap-2">
+                  <div>
+                    <div>{{ match.opponentPlayer1Name || 'N/A' }}</div>
+                    <div v-if="match.matchType === 'doubles' && match.opponentPlayer2Name" class="text-sm text-muted-foreground">
+                      {{ match.opponentPlayer2Name }}
+                    </div>
+                  </div>
+                  <Trophy v-if="match.winnerSide === 'team2'" class="w-4 h-4 text-yellow-500" title="Winner" />
+                </div>
+              </TableCell>
               <TableCell>{{ match.score || 'N/A' }}</TableCell>
               <TableCell>
                 <Badge :variant="getResultVariant(match.result)">
-                  {{ match.result }}
+                  {{ formatResult(match.result) }}
                 </Badge>
               </TableCell>
-              <TableCell>{{ getWinnerNames(match) }}</TableCell>
               <TableCell>
                 <div class="flex gap-2">
                   <Button
@@ -142,47 +196,71 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import Card from '../../components/ui/Card.vue';
 import CardContent from '../../components/ui/CardContent.vue';
 import Button from '../../components/ui/Button.vue';
 import Badge from '../../components/ui/Badge.vue';
+import Input from '../../components/ui/Input.vue';
 import Table from '../../components/ui/Table.vue';
 import TableHeader from '../../components/ui/TableHeader.vue';
 import TableBody from '../../components/ui/TableBody.vue';
 import TableRow from '../../components/ui/TableRow.vue';
 import TableHead from '../../components/ui/TableHead.vue';
 import TableCell from '../../components/ui/TableCell.vue';
-import { Trophy, Plus, Edit2, Trash2, User, Users, Video } from 'lucide-vue-next';
+import { Trophy, Plus, Edit2, Trash2, User, Users, Video, Search } from 'lucide-vue-next';
 import matchService from '../../services/matchService';
-import videoAnalysisService from '../../services/videoAnalysisService';
+import videoService from '../../services/videoService';
 import MatchFormModal from '../../components/MatchFormModal.vue';
 
 const router = useRouter();
-const matches = ref([]);
+const route = useRoute();
+const allMatches = ref([]);
 const matchVideos = ref({}); // Map of matchId -> video
-const statistics = ref(null);
 const loading = ref(false);
 const showModal = ref(false);
 const selectedMatch = ref(null);
+const playerNameFilter = ref('');
+
+// Filtered matches based on player name
+const matches = computed(() => {
+  if (!playerNameFilter.value) return allMatches.value;
+
+  const searchTerm = playerNameFilter.value.toLowerCase();
+  return allMatches.value.filter(match => {
+    const player1 = match.player1Name?.toLowerCase() || '';
+    const player2 = match.player2Name?.toLowerCase() || '';
+    const opp1 = match.opponentPlayer1Name?.toLowerCase() || '';
+    const opp2 = match.opponentPlayer2Name?.toLowerCase() || '';
+
+    return player1.includes(searchTerm) ||
+           player2.includes(searchTerm) ||
+           opp1.includes(searchTerm) ||
+           opp2.includes(searchTerm);
+  });
+});
+
+// Computed statistics based on filtered matches
+const statistics = computed(() => {
+  const matchList = matches.value;
+  return {
+    totalMatches: matchList.length,
+    singlesMatches: matchList.filter(m => m.matchType === 'singles').length,
+    doublesMatches: matchList.filter(m => m.matchType === 'doubles').length
+  };
+});
 
 const loadMatches = async () => {
   loading.value = true;
   try {
-    matches.value = await matchService.getAllMatches();
-    statistics.value = await matchService.getMatchStatistics();
+    allMatches.value = await matchService.getAllMatches();
 
-    // Load videos for each match
+    // Extract videos from match objects (backend returns video embedded in match)
     matchVideos.value = {};
-    for (const match of matches.value) {
-      try {
-        const videos = await videoAnalysisService.getVideosByMatch(match.id);
-        if (videos.length > 0) {
-          matchVideos.value[match.id] = videos[0]; // One video per match
-        }
-      } catch (error) {
-        console.error(`Error loading video for match ${match.id}:`, error);
+    for (const match of allMatches.value) {
+      if (match.video) {
+        matchVideos.value[match.id] = match.video;
       }
     }
   } catch (error) {
@@ -191,6 +269,11 @@ const loadMatches = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const clearFilter = () => {
+  playerNameFilter.value = '';
+  router.replace({ query: {} });
 };
 
 const openCreateModal = () => {
@@ -239,6 +322,20 @@ const formatDate = (dateString) => {
   });
 };
 
+const formatMatchType = (matchType) => {
+  if (!matchType) return '';
+  return matchType.charAt(0).toUpperCase() + matchType.slice(1);
+};
+
+const formatResult = (result) => {
+  if (!result) return '';
+  // Handle special cases with underscores
+  if (result === 'double_default') {
+    return 'Double Default';
+  }
+  return result.charAt(0).toUpperCase() + result.slice(1);
+};
+
 const getResultVariant = (result) => {
   switch (result) {
     case 'complete':
@@ -280,6 +377,10 @@ const getWinnerNames = (match) => {
 };
 
 onMounted(() => {
+  // Check if player name is passed via query parameter
+  if (route.query.playerName) {
+    playerNameFilter.value = route.query.playerName;
+  }
   loadMatches();
 });
 </script>

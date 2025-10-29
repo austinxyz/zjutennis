@@ -260,21 +260,25 @@
           <div v-if="matchVideo && !showVideoForm" class="border border-border rounded-lg p-4">
             <div class="flex justify-between items-start">
               <div class="flex-1">
-                <h4 class="font-medium">{{ matchVideo.title }}</h4>
+                <h4 class="font-medium">Match Video</h4>
                 <p class="text-sm text-muted-foreground mt-1" v-if="matchVideo.description">
                   {{ matchVideo.description }}
                 </p>
-                <p class="text-sm text-muted-foreground mt-2" v-if="matchVideo.videoUrl">
-                  <a :href="matchVideo.videoUrl" target="_blank" class="text-primary hover:underline">
-                    View Video
+                <p class="text-sm mt-2" v-if="matchVideo.videoUrl">
+                  <a :href="matchVideo.videoUrl" target="_blank" class="text-primary hover:underline flex items-center gap-1">
+                    <Video class="w-4 h-4" />
+                    {{ matchVideo.videoUrl }}
                   </a>
+                </p>
+                <p class="text-sm text-muted-foreground mt-1" v-if="matchVideo.analyses && matchVideo.analyses.length > 0">
+                  {{ matchVideo.analyses.length }} analysis available
                 </p>
               </div>
               <div class="flex gap-2">
-                <Button size="sm" variant="outline" @click="editMatchVideo">
+                <Button type="button" size="sm" variant="outline" @click="editMatchVideo">
                   <Edit2 class="w-4 h-4" />
                 </Button>
-                <Button size="sm" variant="destructive" @click="deleteMatchVideo">
+                <Button type="button" size="sm" variant="destructive" @click="deleteMatchVideo">
                   <Trash2 class="w-4 h-4" />
                 </Button>
               </div>
@@ -313,10 +317,10 @@ import Button from './ui/Button.vue';
 import Input from './ui/Input.vue';
 import Label from './ui/Label.vue';
 import Textarea from './ui/Textarea.vue';
-import { X, Plus, Trash2, Edit2 } from 'lucide-vue-next';
+import { X, Plus, Trash2, Edit2, Video } from 'lucide-vue-next';
 import matchService from '../services/matchService';
 import playerService from '../services/playerService';
-import videoAnalysisService from '../services/videoAnalysisService';
+import videoService from '../services/videoService';
 import VideoUploadForm from './VideoUploadForm.vue';
 
 const props = defineProps({
@@ -451,24 +455,45 @@ const loadMatchVideo = async () => {
   if (!props.match?.id) return;
 
   try {
-    const videos = await videoAnalysisService.getVideosByMatch(props.match.id);
-    matchVideo.value = videos.length > 0 ? videos[0] : null;
+    console.log('Loading video for match:', props.match.id);
+    console.log('Match object:', props.match);
+
+    // First check if video is already in match object (from list view)
+    if (props.match.video) {
+      console.log('Found video in match object:', props.match.video);
+      matchVideo.value = props.match.video;
+    } else {
+      console.log('Fetching video from API...');
+      // Otherwise fetch from API
+      const video = await videoService.getVideoByMatch(props.match.id);
+      console.log('Fetched video:', video);
+      matchVideo.value = video;
+    }
+
+    console.log('matchVideo.value set to:', matchVideo.value);
   } catch (error) {
     console.error('Error loading match video:', error);
+    matchVideo.value = null;
   }
 };
 
 const handleVideoSubmit = async (videoData) => {
   try {
+    // Filter to only include fields that Video entity accepts
+    const videoPayload = {
+      title: videoData.title,
+      description: videoData.description,
+      videoUrl: videoData.videoUrl,
+      thumbnailUrl: videoData.thumbnailUrl,
+      durationSeconds: videoData.durationSeconds,
+      matchDate: videoData.matchDate,
+      matchId: props.match?.id
+    };
+
     if (editingVideo.value) {
-      await videoAnalysisService.updateVideo(editingVideo.value.id, videoData);
+      await videoService.updateVideo(editingVideo.value.id, videoPayload);
     } else {
-      const playerId = videoData.playerId || defaultPlayerId.value;
-      if (!playerId) {
-        alert('Please add a player to the match before adding a video');
-        return;
-      }
-      await videoAnalysisService.createVideo(playerId, videoData);
+      await videoService.createVideo(videoPayload);
     }
 
     await loadMatchVideo();
@@ -491,7 +516,7 @@ const deleteMatchVideo = async () => {
   }
 
   try {
-    await videoAnalysisService.deleteVideo(matchVideo.value.id);
+    await videoService.deleteVideo(matchVideo.value.id);
     matchVideo.value = null;
   } catch (error) {
     console.error('Error deleting video:', error);

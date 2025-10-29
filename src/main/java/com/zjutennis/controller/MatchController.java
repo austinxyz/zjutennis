@@ -1,5 +1,7 @@
 package com.zjutennis.controller;
 
+import com.zjutennis.dto.VideoRequest;
+import com.zjutennis.dto.VideoResponse;
 import com.zjutennis.model.Match;
 import com.zjutennis.service.MatchService;
 import lombok.extern.slf4j.Slf4j;
@@ -146,5 +148,68 @@ public class MatchController {
         log.info("GET /api/matches/statistics - Fetching match statistics");
         MatchService.MatchStatistics stats = matchService.getMatchStatistics();
         return ResponseEntity.ok(stats);
+    }
+
+    /**
+     * Attach video to match
+     * POST /api/matches/{matchId}/video
+     */
+    @PostMapping("/{matchId}/video")
+    public ResponseEntity<VideoResponse> attachVideo(
+            @PathVariable Long matchId,
+            @RequestBody VideoRequest videoRequest) {
+        log.info("POST /api/matches/{}/video - Attaching video to match", matchId);
+        try {
+            VideoResponse videoResponse = matchService.attachVideo(matchId, videoRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(videoResponse);
+        } catch (RuntimeException e) {
+            log.error("Error attaching video to match {}: {}", matchId, e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Remove video from match
+     * DELETE /api/matches/{matchId}/video
+     */
+    @DeleteMapping("/{matchId}/video")
+    public ResponseEntity<Void> removeVideo(@PathVariable Long matchId) {
+        log.info("DELETE /api/matches/{}/video - Removing video from match", matchId);
+        try {
+            matchService.removeVideo(matchId);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            log.error("Error removing video from match {}: {}", matchId, e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Get video for match
+     * GET /api/matches/{matchId}/video
+     */
+    @GetMapping("/{matchId}/video")
+    public ResponseEntity<VideoResponse> getMatchVideo(@PathVariable Long matchId) {
+        log.info("GET /api/matches/{}/video - Getting video for match", matchId);
+        try {
+            VideoResponse videoResponse = matchService.getMatchVideo(matchId);
+            return ResponseEntity.ok(videoResponse);
+        } catch (RuntimeException e) {
+            log.error("Error getting video for match {}: {}", matchId, e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Check if match has video
+     * GET /api/matches/{matchId}/has-video
+     */
+    @GetMapping("/{matchId}/has-video")
+    public ResponseEntity<Map<String, Boolean>> hasVideo(@PathVariable Long matchId) {
+        log.info("GET /api/matches/{}/has-video - Checking if match has video", matchId);
+        boolean hasVideo = matchService.hasVideo(matchId);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("hasVideo", hasVideo);
+        return ResponseEntity.ok(response);
     }
 }

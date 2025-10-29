@@ -2,25 +2,43 @@ package com.zjutennis.dto;
 
 import lombok.Data;
 
-import java.time.LocalDate;
-
 /**
- * DTO for creating or updating video analysis entries
- * Accepts matchId as a Long instead of nested Match object
+ * Request DTO for creating/updating video analysis
  */
 @Data
 public class VideoAnalysisRequest {
-    private String title;
-    private String description;
-    private String videoUrl;
-    private String thumbnailUrl;
-    private Long matchId;  // Match ID instead of Match object
-    private LocalDate matchDate;
-    private Integer durationSeconds;
-    private Integer totalShots;
-    private Integer errors;
-    private Integer winners;
-    private Integer aces;
-    private Integer doubleFaults;
-    private Double runningDistanceMeters;
+    private Long videoId; // Required when creating
+    private Long playerId; // Required - which player is being analyzed
+
+    // AI Analysis Status
+    private Boolean aiAnalyzed;
+
+    // Strengths (0-5 scale)
+    private Double strengthForehandScore;
+    private Double strengthServeScore;
+    private Double strengthVolleyScore;
+    private Double strengthMovementScore;
+    private String strengthSummary;
+
+    // Weaknesses (0-5 scale)
+    private Double weaknessBackhandScore;
+    private Double weaknessConsistencyScore;
+    private Double weaknessPressureScore;
+    private String weaknessSummary;
+
+    // Tactical Analysis
+    private String tacticalStyle;
+    private Double aggressionIndex;
+    private Double netApproachFrequency;
+    private Double baselineRallyPreference;
+    private String tacticalSummary;
+
+    // AI Recommendations
+    private String aiRecommendations;
+    private String trainingFocusAreas;
+    private String keyframesJson;
+
+    // Status
+    private String status;
+    private String processingNotes;
 }

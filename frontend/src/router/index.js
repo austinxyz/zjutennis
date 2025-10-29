@@ -3,14 +3,13 @@ import MainLayout from '../components/MainLayout.vue';
 import Dashboard from '../views/Dashboard.vue';
 import PlayerList from '../views/PlayerList.vue';
 import PlayerEdit from '../views/PlayerEdit.vue';
-import PlayerVideoAnalysis from '../views/PlayerVideoAnalysis.vue';
 
 // Player Analysis Views
-import VideoAnalysis from '../views/analysis/VideoAnalysis.vue';
 import PlayerEvaluation from '../views/analysis/PlayerEvaluation.vue';
 import GrowthTrajectory from '../views/analysis/GrowthTrajectory.vue';
 import SinglesDoubles from '../views/analysis/SinglesDoubles.vue';
 import WinPrediction from '../views/analysis/WinPrediction.vue';
+import VideoAnalysisList from '../views/analysis/VideoAnalysisList.vue';
 
 // Match Analysis Views
 import MatchList from '../views/matches/MatchList.vue';
@@ -67,25 +66,7 @@ const routes = [
           description: 'Update player information'
         }
       },
-      {
-        path: 'players/:playerId/videos',
-        name: 'PlayerVideoAnalysis',
-        component: PlayerVideoAnalysis,
-        meta: {
-          title: 'Player Video Analysis',
-          description: 'Manage and analyze player match videos'
-        }
-      },
       // Player Analysis
-      {
-        path: 'analysis/video',
-        name: 'VideoAnalysis',
-        component: VideoAnalysis,
-        meta: {
-          title: 'Video Analysis',
-          description: 'AI-powered match video analysis'
-        }
-      },
       {
         path: 'analysis/evaluation',
         name: 'PlayerEvaluation',
@@ -122,6 +103,15 @@ const routes = [
           description: 'AI-powered match outcome prediction'
         }
       },
+      {
+        path: 'analysis/video',
+        name: 'VideoAnalysisList',
+        component: VideoAnalysisList,
+        meta: {
+          title: 'Video Analysis',
+          description: 'Browse videos and player performance analyses'
+        }
+      },
       // Match Analysis
       {
         path: 'matches',
@@ -133,12 +123,12 @@ const routes = [
         }
       },
       {
-        path: 'matches/:matchId/videos',
+        path: 'matches/:matchId/video',
         name: 'MatchVideoManagement',
         component: MatchVideoManagement,
         meta: {
-          title: 'Match Videos',
-          description: 'Manage videos for this match'
+          title: 'Match Video',
+          description: 'Manage video and analyses for this match'
         }
       },
       {

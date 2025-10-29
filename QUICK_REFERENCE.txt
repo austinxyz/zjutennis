@@ -1,0 +1,37 @@
+╔════════════════════════════════════════════════════════════════╗
+║           ZJU TENNIS - TOOL CONFIGURATION REFERENCE           ║
+╚════════════════════════════════════════════════════════════════╝
+
+📁 Configuration File: .tool-config.json
+
+🛠️  INSTALLED TOOLS:
+   ├─ Maven 3.9.11       → /opt/homebrew/bin/mvn
+   ├─ OpenJDK 25         → /opt/homebrew/Cellar/openjdk/25/bin/java
+   ├─ MySQL Client 9.5.0 → /opt/homebrew/opt/mysql-client/bin/mysql
+   └─ GitHub CLI 2.82.1  → /opt/homebrew/bin/gh
+
+📝 HELPER SCRIPTS:
+   ├─ scripts/load-tools.sh   (Bash - loads env vars)
+   └─ scripts/tool_config.py  (Python - programmatic access)
+
+🚀 QUICK START:
+
+   1. Load environment variables:
+      $ source scripts/load-tools.sh
+
+   2. Use tools via environment variables:
+      $ $MAVEN_BIN clean install
+      $ $JAVA_BIN -version
+      $ $MYSQL_BIN -u root -p
+      $ $GH_BIN repo view
+
+   3. Or use absolute paths directly:
+      $ /opt/homebrew/bin/mvn clean package
+      $ /opt/homebrew/Cellar/openjdk/25/bin/java -jar app.jar
+
+🌍 ENVIRONMENT VARIABLES:
+   JAVA_HOME    → /opt/homebrew/Cellar/openjdk/25/libexec/openjdk.jdk/Contents/Home
+   MAVEN_HOME   → /opt/homebrew/Cellar/maven/3.9.11/libexec
+
+📚 Full Documentation: See TOOL_SETUP.md
+

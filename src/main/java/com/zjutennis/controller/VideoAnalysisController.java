@@ -1,249 +1,137 @@
 package com.zjutennis.controller;
 
 import com.zjutennis.dto.VideoAnalysisRequest;
-import com.zjutennis.model.VideoAnalysis;
+import com.zjutennis.dto.VideoAnalysisResponse;
 import com.zjutennis.service.VideoAnalysisService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * REST Controller for Video Analysis operations
- * Provides endpoints for managing player match videos and AI analysis results
+ * REST Controller for VideoAnalysis operations
  */
 @RestController
-@RequestMapping("/api/video-analysis")
+@RequestMapping("/api/video-analyses")
 @CrossOrigin(origins = "*")
-@Slf4j
 public class VideoAnalysisController {
 
     @Autowired
     private VideoAnalysisService videoAnalysisService;
 
-    @Autowired
-    private com.zjutennis.service.AIAnalysisService aiAnalysisService;
-
     /**
-     * Get all videos across all players
-     * GET /api/video-analysis
+     * Get all video analyses
+     * GET /api/video-analyses
      */
     @GetMapping
-    public ResponseEntity<List<VideoAnalysis>> getAllVideos() {
-        log.info("GET /api/video-analysis - Fetching all videos");
-        List<VideoAnalysis> videos = videoAnalysisService.getAllVideos();
-        return ResponseEntity.ok(videos);
+    public ResponseEntity<List<VideoAnalysisResponse>> getAllAnalyses() {
+        List<VideoAnalysisResponse> analyses = videoAnalysisService.getAllAnalyses();
+        return ResponseEntity.ok(analyses);
     }
 
     /**
-     * Get all videos for a specific player
-     * GET /api/video-analysis/player/{playerId}
-     */
-    @GetMapping("/player/{playerId}")
-    public ResponseEntity<List<VideoAnalysis>> getPlayerVideos(@PathVariable Long playerId) {
-        log.info("GET /api/video-analysis/player/{} - Fetching videos for player", playerId);
-        List<VideoAnalysis> videos = videoAnalysisService.getPlayerVideos(playerId);
-        return ResponseEntity.ok(videos);
-    }
-
-    /**
-     * Get a specific video by ID
-     * GET /api/video-analysis/{id}
+     * Get analysis by ID
+     * GET /api/video-analyses/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<VideoAnalysis> getVideoById(@PathVariable Long id) {
-        log.info("GET /api/video-analysis/{} - Fetching video by id", id);
-        return videoAnalysisService.getVideoById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<VideoAnalysisResponse> getAnalysisById(@PathVariable Long id) {
+        try {
+            VideoAnalysisResponse analysis = videoAnalysisService.getAnalysisById(id);
+            return ResponseEntity.ok(analysis);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**
-     * Create a new video analysis entry
-     * POST /api/video-analysis/player/{playerId}
+     * Get analyses by video ID
+     * GET /api/video-analyses/video/{videoId}
      */
-    @PostMapping("/player/{playerId}")
-    public ResponseEntity<VideoAnalysis> createVideo(
-            @PathVariable Long playerId,
-            @RequestBody VideoAnalysisRequest request) {
-        log.info("POST /api/video-analysis/player/{} - Creating new video", playerId);
+    @GetMapping("/video/{videoId}")
+    public ResponseEntity<List<VideoAnalysisResponse>> getAnalysesByVideoId(@PathVariable Long videoId) {
+        List<VideoAnalysisResponse> analyses = videoAnalysisService.getAnalysesByVideoId(videoId);
+        return ResponseEntity.ok(analyses);
+    }
+
+    /**
+     * Get analyses by player ID
+     * GET /api/video-analyses/player/{playerId}
+     */
+    @GetMapping("/player/{playerId}")
+    public ResponseEntity<List<VideoAnalysisResponse>> getAnalysesByPlayerId(@PathVariable Long playerId) {
+        List<VideoAnalysisResponse> analyses = videoAnalysisService.getAnalysesByPlayerId(playerId);
+        return ResponseEntity.ok(analyses);
+    }
+
+    /**
+     * Get analysis by video and player
+     * GET /api/video-analyses/video/{videoId}/player/{playerId}
+     */
+    @GetMapping("/video/{videoId}/player/{playerId}")
+    public ResponseEntity<VideoAnalysisResponse> getAnalysisByVideoAndPlayer(
+            @PathVariable Long videoId,
+            @PathVariable Long playerId) {
         try {
-            VideoAnalysis created = videoAnalysisService.createVideo(playerId, request);
+            VideoAnalysisResponse analysis = videoAnalysisService.getAnalysisByVideoAndPlayer(videoId, playerId);
+            return ResponseEntity.ok(analysis);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Create video analysis
+     * POST /api/video-analyses
+     */
+    @PostMapping
+    public ResponseEntity<VideoAnalysisResponse> createAnalysis(@RequestBody VideoAnalysisRequest request) {
+        try {
+            VideoAnalysisResponse created = videoAnalysisService.createAnalysis(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (RuntimeException e) {
-            log.error("Error creating video for player {}: {}", playerId, e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
 
     /**
-     * Update an existing video analysis entry
-     * PUT /api/video-analysis/{id}
+     * Update video analysis
+     * PUT /api/video-analyses/{id}
      */
     @PutMapping("/{id}")
-    public ResponseEntity<VideoAnalysis> updateVideo(
+    public ResponseEntity<VideoAnalysisResponse> updateAnalysis(
             @PathVariable Long id,
-            @RequestBody VideoAnalysis videoAnalysis) {
-        log.info("PUT /api/video-analysis/{} - Updating video", id);
+            @RequestBody VideoAnalysisRequest request) {
         try {
-            VideoAnalysis updated = videoAnalysisService.updateVideo(id, videoAnalysis);
+            VideoAnalysisResponse updated = videoAnalysisService.updateAnalysis(id, request);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
-            log.error("Error updating video {}: {}", id, e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
 
     /**
-     * Delete a video analysis entry
-     * DELETE /api/video-analysis/{id}
+     * Delete video analysis
+     * DELETE /api/video-analyses/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVideo(@PathVariable Long id) {
-        log.info("DELETE /api/video-analysis/{} - Deleting video", id);
+    public ResponseEntity<Void> deleteAnalysis(@PathVariable Long id) {
         try {
-            videoAnalysisService.deleteVideo(id);
+            videoAnalysisService.deleteAnalysis(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
-            log.error("Error deleting video {}: {}", id, e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
 
     /**
-     * Get all analyzed videos for a player
-     * GET /api/video-analysis/player/{playerId}/analyzed
+     * Get analysis count for video
+     * GET /api/video-analyses/video/{videoId}/count
      */
-    @GetMapping("/player/{playerId}/analyzed")
-    public ResponseEntity<List<VideoAnalysis>> getAnalyzedVideos(@PathVariable Long playerId) {
-        log.info("GET /api/video-analysis/player/{}/analyzed - Fetching analyzed videos", playerId);
-        List<VideoAnalysis> videos = videoAnalysisService.getAnalyzedVideos(playerId);
-        return ResponseEntity.ok(videos);
-    }
-
-    /**
-     * Get video statistics for a player
-     * GET /api/video-analysis/player/{playerId}/stats
-     */
-    @GetMapping("/player/{playerId}/stats")
-    public ResponseEntity<Map<String, Long>> getPlayerVideoStats(@PathVariable Long playerId) {
-        log.info("GET /api/video-analysis/player/{}/stats - Fetching video stats", playerId);
-        Map<String, Long> stats = new HashMap<>();
-        stats.put("totalVideos", videoAnalysisService.getPlayerVideoCount(playerId));
-        stats.put("analyzedVideos", videoAnalysisService.getPlayerAnalyzedVideoCount(playerId));
-        return ResponseEntity.ok(stats);
-    }
-
-    /**
-     * Mark a video as analyzed
-     * POST /api/video-analysis/{id}/mark-analyzed
-     */
-    @PostMapping("/{id}/mark-analyzed")
-    public ResponseEntity<VideoAnalysis> markAsAnalyzed(@PathVariable Long id) {
-        log.info("POST /api/video-analysis/{}/mark-analyzed - Marking video as analyzed", id);
-        try {
-            VideoAnalysis updated = videoAnalysisService.markAsAnalyzed(id);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            log.error("Error marking video {} as analyzed: {}", id, e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    /**
-     * Update AI analysis results for a video
-     * PUT /api/video-analysis/{id}/ai-analysis
-     */
-    @PutMapping("/{id}/ai-analysis")
-    public ResponseEntity<VideoAnalysis> updateAIAnalysis(
-            @PathVariable Long id,
-            @RequestBody VideoAnalysis aiResults) {
-        log.info("PUT /api/video-analysis/{}/ai-analysis - Updating AI analysis", id);
-        try {
-            VideoAnalysis updated = videoAnalysisService.updateAIAnalysis(id, aiResults);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            log.error("Error updating AI analysis for video {}: {}", id, e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    /**
-     * Trigger AI analysis for a video
-     * POST /api/video-analysis/{id}/analyze
-     */
-    @PostMapping("/{id}/analyze")
-    public ResponseEntity<VideoAnalysis> analyzeVideo(@PathVariable Long id) {
-        log.info("POST /api/video-analysis/{}/analyze - Triggering AI analysis", id);
-        try {
-            VideoAnalysis analyzed = aiAnalysisService.analyzeVideo(id);
-            return ResponseEntity.ok(analyzed);
-        } catch (RuntimeException e) {
-            log.error("Error analyzing video {}: {}", id, e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * Upload and import analysis data from CSV file
-     * POST /api/video-analysis/{id}/import-csv
-     */
-    @PostMapping("/{id}/import-csv")
-    public ResponseEntity<Map<String, Object>> importCSV(
-            @PathVariable Long id,
-            @RequestParam("file") MultipartFile file) {
-        log.info("POST /api/video-analysis/{}/import-csv - Importing CSV", id);
-        try {
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "File is empty"));
-            }
-
-            if (!file.getOriginalFilename().toLowerCase().endsWith(".csv")) {
-                return ResponseEntity.badRequest().body(Map.of("error", "File must be a CSV"));
-            }
-
-            // Read CSV content
-            String csvContent = new String(file.getBytes());
-
-            // Return CSV content for frontend processing
-            // Frontend will parse and submit via updateAIAnalysis endpoint
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("csvContent", csvContent);
-            response.put("filename", file.getOriginalFilename());
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            log.error("Error importing CSV for video {}: {}", id, e.getMessage());
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    /**
-     * Get all videos accessible to a player (own videos + match videos)
-     * GET /api/video-analysis/player/{playerId}/accessible
-     */
-    @GetMapping("/player/{playerId}/accessible")
-    public ResponseEntity<List<VideoAnalysis>> getVideosAccessibleToPlayer(@PathVariable Long playerId) {
-        log.info("GET /api/video-analysis/player/{}/accessible - Fetching accessible videos", playerId);
-        List<VideoAnalysis> videos = videoAnalysisService.getVideosAccessibleToPlayer(playerId);
-        return ResponseEntity.ok(videos);
-    }
-
-    /**
-     * Get all videos for a specific match
-     * GET /api/video-analysis/match/{matchId}
-     */
-    @GetMapping("/match/{matchId}")
-    public ResponseEntity<List<VideoAnalysis>> getVideosByMatch(@PathVariable Long matchId) {
-        log.info("GET /api/video-analysis/match/{} - Fetching videos for match", matchId);
-        List<VideoAnalysis> videos = videoAnalysisService.getVideosByMatch(matchId);
-        return ResponseEntity.ok(videos);
+    @GetMapping("/video/{videoId}/count")
+    public ResponseEntity<Long> getAnalysisCountForVideo(@PathVariable Long videoId) {
+        long count = videoAnalysisService.getAnalysisCountForVideo(videoId);
+        return ResponseEntity.ok(count);
     }
 }

@@ -1,276 +1,196 @@
 package com.zjutennis.service;
 
-import com.zjutennis.model.Match;
+import com.zjutennis.dto.VideoAnalysisRequest;
+import com.zjutennis.dto.VideoAnalysisResponse;
 import com.zjutennis.model.Player;
+import com.zjutennis.model.Video;
 import com.zjutennis.model.VideoAnalysis;
-import com.zjutennis.repository.MatchRepository;
 import com.zjutennis.repository.PlayerRepository;
 import com.zjutennis.repository.VideoAnalysisRepository;
-import lombok.extern.slf4j.Slf4j;
+import com.zjutennis.repository.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * Service for managing video analysis operations
+ * Service for VideoAnalysis operations
  */
 @Service
-@Slf4j
+@Transactional
 public class VideoAnalysisService {
 
     @Autowired
     private VideoAnalysisRepository videoAnalysisRepository;
 
     @Autowired
-    private PlayerRepository playerRepository;
+    private VideoRepository videoRepository;
 
     @Autowired
-    private MatchRepository matchRepository;
+    private PlayerRepository playerRepository;
 
     /**
-     * Get all videos across all players
+     * Get all video analyses
      */
-    public List<VideoAnalysis> getAllVideos() {
-        log.debug("Fetching all videos across all players");
-        return videoAnalysisRepository.findAllByOrderByMatchDateDesc();
+    public List<VideoAnalysisResponse> getAllAnalyses() {
+        return videoAnalysisRepository.findAll().stream()
+                .map(VideoAnalysisResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Get all videos for a specific player
+     * Get analysis by ID
      */
-    public List<VideoAnalysis> getPlayerVideos(Long playerId) {
-        log.debug("Fetching all videos for player ID: {}", playerId);
-        return videoAnalysisRepository.findByPlayerIdOrderByMatchDateDesc(playerId);
+    public VideoAnalysisResponse getAnalysisById(Long id) {
+        VideoAnalysis analysis = videoAnalysisRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Video analysis not found with id: " + id));
+        return VideoAnalysisResponse.fromEntity(analysis);
     }
 
     /**
-     * Get a specific video by ID
+     * Get all analyses for a video
      */
-    public Optional<VideoAnalysis> getVideoById(Long id) {
-        log.debug("Fetching video with ID: {}", id);
-        return videoAnalysisRepository.findById(id);
+    public List<VideoAnalysisResponse> getAnalysesByVideoId(Long videoId) {
+        return videoAnalysisRepository.findByVideoId(videoId).stream()
+                .map(VideoAnalysisResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Create a new video analysis entry
+     * Get all analyses for a player
      */
-    @Transactional
-    public VideoAnalysis createVideo(Long playerId, com.zjutennis.dto.VideoAnalysisRequest request) {
-        log.debug("Creating new video for player ID: {}", playerId);
+    public List<VideoAnalysisResponse> getAnalysesByPlayerId(Long playerId) {
+        return videoAnalysisRepository.findByPlayerId(playerId).stream()
+                .map(VideoAnalysisResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
 
-        Player player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new RuntimeException("Player not found with id: " + playerId));
+    /**
+     * Get analysis for specific video and player
+     */
+    public VideoAnalysisResponse getAnalysisByVideoAndPlayer(Long videoId, Long playerId) {
+        VideoAnalysis analysis = videoAnalysisRepository.findByVideoIdAndPlayerId(videoId, playerId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Video analysis not found for video: " + videoId + " and player: " + playerId));
+        return VideoAnalysisResponse.fromEntity(analysis);
+    }
 
-        VideoAnalysis videoAnalysis = new VideoAnalysis();
-        videoAnalysis.setPlayer(player);
-        videoAnalysis.setTitle(request.getTitle());
-        videoAnalysis.setDescription(request.getDescription());
-        videoAnalysis.setVideoUrl(request.getVideoUrl());
-        videoAnalysis.setThumbnailUrl(request.getThumbnailUrl());
-        videoAnalysis.setMatchDate(request.getMatchDate());
-        videoAnalysis.setDurationSeconds(request.getDurationSeconds());
-        videoAnalysis.setTotalShots(request.getTotalShots());
-        videoAnalysis.setErrors(request.getErrors());
-        videoAnalysis.setWinners(request.getWinners());
-        videoAnalysis.setAces(request.getAces());
-        videoAnalysis.setDoubleFaults(request.getDoubleFaults());
-        videoAnalysis.setRunningDistanceMeters(request.getRunningDistanceMeters());
-        videoAnalysis.setUploadDate(LocalDateTime.now());
-        videoAnalysis.setStatus("pending");
-        videoAnalysis.setAiAnalyzed(false);
-
-        // Link to match if provided
-        if (request.getMatchId() != null) {
-            Match match = matchRepository.findById(request.getMatchId())
-                    .orElseThrow(() -> new RuntimeException("Match not found with id: " + request.getMatchId()));
-            videoAnalysis.setMatch(match);
+    /**
+     * Create video analysis
+     */
+    public VideoAnalysisResponse createAnalysis(VideoAnalysisRequest request) {
+        if (request.getVideoId() == null) {
+            throw new RuntimeException("Video ID is required");
+        }
+        if (request.getPlayerId() == null) {
+            throw new RuntimeException("Player ID is required");
         }
 
-        return videoAnalysisRepository.save(videoAnalysis);
+        // Check if video exists
+        Video video = videoRepository.findById(request.getVideoId())
+                .orElseThrow(() -> new RuntimeException("Video not found with id: " + request.getVideoId()));
+
+        // Check if player exists
+        Player player = playerRepository.findById(request.getPlayerId())
+                .orElseThrow(() -> new RuntimeException("Player not found with id: " + request.getPlayerId()));
+
+        // Check if analysis already exists for this video and player
+        if (videoAnalysisRepository.existsByVideoIdAndPlayerId(request.getVideoId(), request.getPlayerId())) {
+            throw new RuntimeException("Analysis already exists for video: " + request.getVideoId()
+                    + " and player: " + request.getPlayerId());
+        }
+
+        VideoAnalysis analysis = new VideoAnalysis();
+        analysis.setVideo(video);
+        analysis.setPlayer(player);
+        updateAnalysisFromRequest(analysis, request);
+
+        VideoAnalysis saved = videoAnalysisRepository.save(analysis);
+        return VideoAnalysisResponse.fromEntity(saved);
     }
 
     /**
-     * Update an existing video analysis entry
+     * Update video analysis
      */
-    @Transactional
-    public VideoAnalysis updateVideo(Long id, VideoAnalysis updatedVideo) {
-        log.debug("Updating video with ID: {}", id);
+    public VideoAnalysisResponse updateAnalysis(Long id, VideoAnalysisRequest request) {
+        VideoAnalysis analysis = videoAnalysisRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Video analysis not found with id: " + id));
 
-        return videoAnalysisRepository.findById(id)
-                .map(video -> {
-                    // Update basic information
-                    if (updatedVideo.getTitle() != null) {
-                        video.setTitle(updatedVideo.getTitle());
-                    }
-                    if (updatedVideo.getDescription() != null) {
-                        video.setDescription(updatedVideo.getDescription());
-                    }
-                    if (updatedVideo.getVideoUrl() != null) {
-                        video.setVideoUrl(updatedVideo.getVideoUrl());
-                    }
-                    if (updatedVideo.getThumbnailUrl() != null) {
-                        video.setThumbnailUrl(updatedVideo.getThumbnailUrl());
-                    }
-                    if (updatedVideo.getMatchDate() != null) {
-                        video.setMatchDate(updatedVideo.getMatchDate());
-                    }
+        updateAnalysisFromRequest(analysis, request);
 
-                    // Update match statistics
-                    if (updatedVideo.getTotalShots() != null) {
-                        video.setTotalShots(updatedVideo.getTotalShots());
-                    }
-                    if (updatedVideo.getErrors() != null) {
-                        video.setErrors(updatedVideo.getErrors());
-                    }
-                    if (updatedVideo.getWinners() != null) {
-                        video.setWinners(updatedVideo.getWinners());
-                    }
-                    if (updatedVideo.getAces() != null) {
-                        video.setAces(updatedVideo.getAces());
-                    }
-                    if (updatedVideo.getDoubleFaults() != null) {
-                        video.setDoubleFaults(updatedVideo.getDoubleFaults());
-                    }
-                    if (updatedVideo.getRunningDistanceMeters() != null) {
-                        video.setRunningDistanceMeters(updatedVideo.getRunningDistanceMeters());
-                    }
-
-                    // Update AI analysis results if provided
-                    if (updatedVideo.getStrengthSummary() != null) {
-                        video.setStrengthSummary(updatedVideo.getStrengthSummary());
-                    }
-                    if (updatedVideo.getWeaknessSummary() != null) {
-                        video.setWeaknessSummary(updatedVideo.getWeaknessSummary());
-                    }
-                    if (updatedVideo.getTacticalSummary() != null) {
-                        video.setTacticalSummary(updatedVideo.getTacticalSummary());
-                    }
-                    if (updatedVideo.getAiRecommendations() != null) {
-                        video.setAiRecommendations(updatedVideo.getAiRecommendations());
-                    }
-
-                    // Update status
-                    if (updatedVideo.getStatus() != null) {
-                        video.setStatus(updatedVideo.getStatus());
-                    }
-
-                    return videoAnalysisRepository.save(video);
-                })
-                .orElseThrow(() -> new RuntimeException("Video not found with id: " + id));
+        VideoAnalysis updated = videoAnalysisRepository.save(analysis);
+        return VideoAnalysisResponse.fromEntity(updated);
     }
 
     /**
-     * Delete a video analysis entry
+     * Delete video analysis
      */
-    @Transactional
-    public void deleteVideo(Long id) {
-        log.debug("Deleting video with ID: {}", id);
+    public void deleteAnalysis(Long id) {
+        if (!videoAnalysisRepository.existsById(id)) {
+            throw new RuntimeException("Video analysis not found with id: " + id);
+        }
         videoAnalysisRepository.deleteById(id);
     }
 
     /**
-     * Mark video as analyzed by AI
+     * Delete all analyses for a video
      */
-    @Transactional
-    public VideoAnalysis markAsAnalyzed(Long id) {
-        log.debug("Marking video as analyzed: {}", id);
-
-        return videoAnalysisRepository.findById(id)
-                .map(video -> {
-                    video.setAiAnalyzed(true);
-                    video.setAiAnalysisDate(LocalDateTime.now());
-                    video.setStatus("completed");
-                    return videoAnalysisRepository.save(video);
-                })
-                .orElseThrow(() -> new RuntimeException("Video not found with id: " + id));
+    public void deleteAnalysesByVideoId(Long videoId) {
+        videoAnalysisRepository.deleteByVideoId(videoId);
     }
 
     /**
-     * Get all analyzed videos for a player
+     * Get analysis count for a video
      */
-    public List<VideoAnalysis> getAnalyzedVideos(Long playerId) {
-        log.debug("Fetching analyzed videos for player ID: {}", playerId);
-        return videoAnalysisRepository.findByPlayerIdAndAiAnalyzedTrue(playerId);
+    public long getAnalysisCountForVideo(Long videoId) {
+        return videoAnalysisRepository.countByVideoId(videoId);
     }
 
     /**
-     * Get count of videos for a player
+     * Get analysis count for a player
      */
-    public long getPlayerVideoCount(Long playerId) {
+    public long getAnalysisCountForPlayer(Long playerId) {
         return videoAnalysisRepository.countByPlayerId(playerId);
     }
 
     /**
-     * Get count of analyzed videos for a player
+     * Helper method to update analysis from request
      */
-    public long getPlayerAnalyzedVideoCount(Long playerId) {
-        return videoAnalysisRepository.countAnalyzedVideosByPlayerId(playerId);
-    }
+    private void updateAnalysisFromRequest(VideoAnalysis analysis, VideoAnalysisRequest request) {
+        if (request.getAiAnalyzed() != null) {
+            analysis.setAiAnalyzed(request.getAiAnalyzed());
+            if (request.getAiAnalyzed()) {
+                analysis.setAiAnalysisDate(LocalDateTime.now());
+            }
+        }
 
-    /**
-     * Update AI analysis results for a video
-     */
-    @Transactional
-    public VideoAnalysis updateAIAnalysis(Long id, VideoAnalysis aiResults) {
-        log.debug("Updating AI analysis for video ID: {}", id);
+        analysis.setStrengthForehandScore(request.getStrengthForehandScore());
+        analysis.setStrengthServeScore(request.getStrengthServeScore());
+        analysis.setStrengthVolleyScore(request.getStrengthVolleyScore());
+        analysis.setStrengthMovementScore(request.getStrengthMovementScore());
+        analysis.setStrengthSummary(request.getStrengthSummary());
 
-        return videoAnalysisRepository.findById(id)
-                .map(video -> {
-                    // Update strength scores
-                    video.setStrengthForehandScore(aiResults.getStrengthForehandScore());
-                    video.setStrengthServeScore(aiResults.getStrengthServeScore());
-                    video.setStrengthVolleyScore(aiResults.getStrengthVolleyScore());
-                    video.setStrengthMovementScore(aiResults.getStrengthMovementScore());
-                    video.setStrengthSummary(aiResults.getStrengthSummary());
+        analysis.setWeaknessBackhandScore(request.getWeaknessBackhandScore());
+        analysis.setWeaknessConsistencyScore(request.getWeaknessConsistencyScore());
+        analysis.setWeaknessPressureScore(request.getWeaknessPressureScore());
+        analysis.setWeaknessSummary(request.getWeaknessSummary());
 
-                    // Update weakness scores
-                    video.setWeaknessBackhandScore(aiResults.getWeaknessBackhandScore());
-                    video.setWeaknessConsistencyScore(aiResults.getWeaknessConsistencyScore());
-                    video.setWeaknessPressureScore(aiResults.getWeaknessPressureScore());
-                    video.setWeaknessSummary(aiResults.getWeaknessSummary());
+        analysis.setTacticalStyle(request.getTacticalStyle());
+        analysis.setAggressionIndex(request.getAggressionIndex());
+        analysis.setNetApproachFrequency(request.getNetApproachFrequency());
+        analysis.setBaselineRallyPreference(request.getBaselineRallyPreference());
+        analysis.setTacticalSummary(request.getTacticalSummary());
 
-                    // Update tactical analysis
-                    video.setTacticalStyle(aiResults.getTacticalStyle());
-                    video.setAggressionIndex(aiResults.getAggressionIndex());
-                    video.setNetApproachFrequency(aiResults.getNetApproachFrequency());
-                    video.setBaselineRallyPreference(aiResults.getBaselineRallyPreference());
-                    video.setTacticalSummary(aiResults.getTacticalSummary());
+        analysis.setAiRecommendations(request.getAiRecommendations());
+        analysis.setTrainingFocusAreas(request.getTrainingFocusAreas());
+        analysis.setKeyframesJson(request.getKeyframesJson());
 
-                    // Update recommendations
-                    video.setAiRecommendations(aiResults.getAiRecommendations());
-                    video.setTrainingFocusAreas(aiResults.getTrainingFocusAreas());
-
-                    // Update keyframes
-                    video.setKeyframesJson(aiResults.getKeyframesJson());
-
-                    // Mark as analyzed
-                    video.setAiAnalyzed(true);
-                    video.setAiAnalysisDate(LocalDateTime.now());
-                    video.setStatus("completed");
-
-                    return videoAnalysisRepository.save(video);
-                })
-                .orElseThrow(() -> new RuntimeException("Video not found with id: " + id));
-    }
-
-    /**
-     * Get all videos accessible to a player
-     * This includes videos uploaded by the player and videos from matches they participated in
-     */
-    public List<VideoAnalysis> getVideosAccessibleToPlayer(Long playerId) {
-        log.debug("Fetching all videos accessible to player ID: {}", playerId);
-        return videoAnalysisRepository.findVideosAccessibleToPlayer(playerId);
-    }
-
-    /**
-     * Get all videos for a specific match
-     */
-    public List<VideoAnalysis> getVideosByMatch(Long matchId) {
-        log.debug("Fetching all videos for match ID: {}", matchId);
-        return videoAnalysisRepository.findByMatchIdOrderByUploadDateDesc(matchId);
+        if (request.getStatus() != null) {
+            analysis.setStatus(request.getStatus());
+        }
+        analysis.setProcessingNotes(request.getProcessingNotes());
     }
 }

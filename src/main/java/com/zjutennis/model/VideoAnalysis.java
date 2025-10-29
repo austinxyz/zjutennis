@@ -7,16 +7,12 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Entity representing video analysis for a SPECIFIC PLAYER's performance
- * Each video analysis focuses on analyzing ONE player, even if the match/video includes multiple players
- * The 'player' field indicates whose performance is being analyzed
- * The 'match' field (optional) links to the match where this video was recorded
- * Supports both uploaded videos and external links (YouTube, etc.)
- * Includes AI-generated analysis of strengths, weaknesses, and tactics for the specified player
+ * VideoAnalysis entity representing player-specific performance analysis for a video
+ * Each analysis focuses on ONE player's performance in a video
+ * Multiple analyses can exist for the same video (one per player)
  */
 @Entity
 @Table(name = "video_analysis")
@@ -28,59 +24,17 @@ public class VideoAnalysis {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Relationship to Video (required)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "video_id", nullable = false)
+    @JsonBackReference("video-analyses")
+    private Video video;
+
+    // Relationship to Player (required - which player is being analyzed)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", nullable = false)
-    @JsonBackReference("player-videos")
+    @JsonBackReference("player-analyses")
     private Player player;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "match_id")
-    @JsonBackReference("match-videos")
-    private Match match;
-
-    // Video Information
-    @Column(name = "title", nullable = false, length = 200)
-    private String title;
-
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
-
-    @Column(name = "video_url", length = 500)
-    private String videoUrl; // External URL (YouTube, etc.)
-
-    @Column(name = "video_file_path", length = 500)
-    private String videoFilePath; // Local uploaded file path
-
-    @Column(name = "thumbnail_url", length = 500)
-    private String thumbnailUrl;
-
-    @Column(name = "duration_seconds")
-    private Integer durationSeconds;
-
-    @Column(name = "upload_date")
-    private LocalDateTime uploadDate;
-
-    @Column(name = "match_date")
-    private LocalDate matchDate;
-
-    // Match Summary Statistics
-    @Column(name = "total_shots")
-    private Integer totalShots;
-
-    @Column(name = "errors")
-    private Integer errors; // Unforced errors
-
-    @Column(name = "winners")
-    private Integer winners;
-
-    @Column(name = "aces")
-    private Integer aces;
-
-    @Column(name = "double_faults")
-    private Integer doubleFaults;
-
-    @Column(name = "running_distance_meters")
-    private Double runningDistanceMeters;
 
     // AI Analysis Status
     @Column(name = "ai_analyzed")

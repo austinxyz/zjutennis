@@ -1,7 +1,10 @@
 package com.zjutennis.service;
 
+import com.zjutennis.dto.VideoRequest;
+import com.zjutennis.dto.VideoResponse;
 import com.zjutennis.model.Match;
 import com.zjutennis.model.Player;
+import com.zjutennis.model.Video;
 import com.zjutennis.repository.MatchRepository;
 import com.zjutennis.repository.PlayerRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,9 @@ public class MatchService {
 
     @Autowired
     private PlayerRepository playerRepository;
+
+    @Autowired
+    private VideoService videoService;
 
     /**
      * Get all matches
@@ -284,6 +290,72 @@ public class MatchService {
         } catch (Exception e) {
             log.warn("Failed to link player entity for field {}: {}", playerField, e.getMessage());
         }
+    }
+
+    /**
+     * Attach video to match
+     */
+    @Transactional
+    public VideoResponse attachVideo(Long matchId, VideoRequest videoRequest) {
+        log.info("Attaching video to match ID: {}", matchId);
+
+        // Check if match exists
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found with id: " + matchId));
+
+        // Check if match already has a video
+        if (match.getVideo() != null) {
+            throw new RuntimeException("Match already has a video attached. Remove it first before adding a new one.");
+        }
+
+        // Set the match ID in the request
+        videoRequest.setMatchId(matchId);
+
+        // Create the video using VideoService
+        VideoResponse videoResponse = videoService.createVideo(videoRequest);
+
+        return videoResponse;
+    }
+
+    /**
+     * Remove video from match
+     */
+    @Transactional
+    public void removeVideo(Long matchId) {
+        log.info("Removing video from match ID: {}", matchId);
+
+        // Check if match exists
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found with id: " + matchId));
+
+        // Check if match has a video
+        if (match.getVideo() == null) {
+            throw new RuntimeException("Match does not have a video attached");
+        }
+
+        // Delete the video (will cascade delete analyses)
+        videoService.deleteVideo(match.getVideo().getId());
+    }
+
+    /**
+     * Get video for a match
+     */
+    public VideoResponse getMatchVideo(Long matchId) {
+        log.info("Getting video for match ID: {}", matchId);
+
+        // Check if match exists
+        if (!matchRepository.existsById(matchId)) {
+            throw new RuntimeException("Match not found with id: " + matchId);
+        }
+
+        return videoService.getVideoByMatchId(matchId);
+    }
+
+    /**
+     * Check if match has a video
+     */
+    public boolean hasVideo(Long matchId) {
+        return videoService.videoExistsForMatch(matchId);
     }
 
     /**

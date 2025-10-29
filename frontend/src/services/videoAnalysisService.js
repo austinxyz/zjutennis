@@ -1,153 +1,95 @@
 import axios from 'axios';
 
-const API_URL = '/api/video-analysis';
+const API_URL = '/api/video-analyses';
 
 class VideoAnalysisService {
   /**
-   * Get all videos across all players
-   * @returns {Promise<Array>} List of all videos
+   * Get all video analyses
+   * @returns {Promise<Array>} List of all analyses
    */
-  async getAllVideos() {
+  async getAllAnalyses() {
     const response = await axios.get(API_URL);
     return response.data;
   }
 
   /**
-   * Get all videos for a specific player
-   * @param {number} playerId - Player ID
-   * @returns {Promise<Array>} List of videos
+   * Get analysis by ID
+   * @param {number} id - Analysis ID
+   * @returns {Promise<Object>} Analysis object
    */
-  async getPlayerVideos(playerId) {
-    const response = await axios.get(`${API_URL}/player/${playerId}`);
-    return response.data;
-  }
-
-  /**
-   * Get a specific video by ID
-   * @param {number} id - Video ID
-   * @returns {Promise<Object>} Video object
-   */
-  async getVideoById(id) {
+  async getAnalysisById(id) {
     const response = await axios.get(`${API_URL}/${id}`);
     return response.data;
   }
 
   /**
-   * Create a new video analysis entry
+   * Get all analyses for a video
+   * @param {number} videoId - Video ID
+   * @returns {Promise<Array>} List of analyses
+   */
+  async getAnalysesByVideo(videoId) {
+    const response = await axios.get(`${API_URL}/video/${videoId}`);
+    return response.data;
+  }
+
+  /**
+   * Get all analyses for a player
    * @param {number} playerId - Player ID
-   * @param {Object} videoData - Video data
-   * @returns {Promise<Object>} Created video object
+   * @returns {Promise<Array>} List of analyses
    */
-  async createVideo(playerId, videoData) {
-    const response = await axios.post(`${API_URL}/player/${playerId}`, videoData);
+  async getAnalysesByPlayer(playerId) {
+    const response = await axios.get(`${API_URL}/player/${playerId}`);
     return response.data;
   }
 
   /**
-   * Update an existing video
-   * @param {number} id - Video ID
-   * @param {Object} videoData - Updated video data
-   * @returns {Promise<Object>} Updated video object
+   * Get analysis for specific video and player
+   * @param {number} videoId - Video ID
+   * @param {number} playerId - Player ID
+   * @returns {Promise<Object>} Analysis object
    */
-  async updateVideo(id, videoData) {
-    const response = await axios.put(`${API_URL}/${id}`, videoData);
+  async getAnalysisByVideoAndPlayer(videoId, playerId) {
+    const response = await axios.get(`${API_URL}/video/${videoId}/player/${playerId}`);
     return response.data;
   }
 
   /**
-   * Delete a video
-   * @param {number} id - Video ID
+   * Create video analysis
+   * @param {Object} analysisData - Analysis data (videoId, playerId, and analysis fields)
+   * @returns {Promise<Object>} Created analysis object
+   */
+  async createAnalysis(analysisData) {
+    const response = await axios.post(API_URL, analysisData);
+    return response.data;
+  }
+
+  /**
+   * Update video analysis
+   * @param {number} id - Analysis ID
+   * @param {Object} analysisData - Updated analysis data
+   * @returns {Promise<Object>} Updated analysis object
+   */
+  async updateAnalysis(id, analysisData) {
+    const response = await axios.put(`${API_URL}/${id}`, analysisData);
+    return response.data;
+  }
+
+  /**
+   * Delete video analysis
+   * @param {number} id - Analysis ID
    * @returns {Promise<void>}
    */
-  async deleteVideo(id) {
+  async deleteAnalysis(id) {
     await axios.delete(`${API_URL}/${id}`);
   }
 
   /**
-   * Get all analyzed videos for a player
-   * @param {number} playerId - Player ID
-   * @returns {Promise<Array>} List of analyzed videos
+   * Get analysis count for a video
+   * @param {number} videoId - Video ID
+   * @returns {Promise<number>} Count of analyses
    */
-  async getAnalyzedVideos(playerId) {
-    const response = await axios.get(`${API_URL}/player/${playerId}/analyzed`);
-    return response.data;
-  }
-
-  /**
-   * Get video statistics for a player
-   * @param {number} playerId - Player ID
-   * @returns {Promise<Object>} Video statistics (totalVideos, analyzedVideos)
-   */
-  async getPlayerVideoStats(playerId) {
-    const response = await axios.get(`${API_URL}/player/${playerId}/stats`);
-    return response.data;
-  }
-
-  /**
-   * Mark a video as analyzed
-   * @param {number} id - Video ID
-   * @returns {Promise<Object>} Updated video object
-   */
-  async markAsAnalyzed(id) {
-    const response = await axios.post(`${API_URL}/${id}/mark-analyzed`);
-    return response.data;
-  }
-
-  /**
-   * Update AI analysis results for a video
-   * @param {number} id - Video ID
-   * @param {Object} aiResults - AI analysis results
-   * @returns {Promise<Object>} Updated video object
-   */
-  async updateAIAnalysis(id, aiResults) {
-    const response = await axios.put(`${API_URL}/${id}/ai-analysis`, aiResults);
-    return response.data;
-  }
-
-  /**
-   * Trigger AI analysis for a video
-   * @param {number} id - Video ID
-   * @returns {Promise<Object>} Analyzed video object
-   */
-  async analyzeVideo(id) {
-    const response = await axios.post(`${API_URL}/${id}/analyze`);
-    return response.data;
-  }
-
-  /**
-   * Import analysis data from CSV file
-   * @param {number} id - Video ID
-   * @param {File} file - CSV file
-   * @returns {Promise<Object>} Response with CSV content
-   */
-  async importCSV(id, file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await axios.post(`${API_URL}/${id}/import-csv`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    return response.data;
-  }
-
-  /**
-   * Get all videos accessible to a player (own videos + match videos)
-   * @param {number} playerId - Player ID
-   * @returns {Promise<Array>} List of accessible videos
-   */
-  async getVideosAccessibleToPlayer(playerId) {
-    const response = await axios.get(`${API_URL}/player/${playerId}/accessible`);
-    return response.data;
-  }
-
-  /**
-   * Get all videos for a specific match
-   * @param {number} matchId - Match ID
-   * @returns {Promise<Array>} List of videos for the match
-   */
-  async getVideosByMatch(matchId) {
-    const response = await axios.get(`${API_URL}/match/${matchId}`);
+  async getAnalysisCountForVideo(videoId) {
+    const response = await axios.get(`${API_URL}/video/${videoId}/count`);
     return response.data;
   }
 }

@@ -1,5 +1,6 @@
 package com.zjutennis.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -63,6 +64,7 @@ public class Match {
     // Player fields - Team 1 (Our Team)
     @ManyToOne
     @JoinColumn(name = "player1_id")
+    @JsonIgnoreProperties({"videoAnalyses", "skills", "statistics", "alumni"})
     private Player player1;
 
     @Column(name = "player1_name", length = 100)
@@ -70,6 +72,7 @@ public class Match {
 
     @ManyToOne
     @JoinColumn(name = "player2_id")
+    @JsonIgnoreProperties({"videoAnalyses", "skills", "statistics", "alumni"})
     private Player player2;
 
     @Column(name = "player2_name", length = 100)
@@ -78,6 +81,7 @@ public class Match {
     // Player fields - Team 2 (Opponent)
     @ManyToOne
     @JoinColumn(name = "opponent_player1_id")
+    @JsonIgnoreProperties({"videoAnalyses", "skills", "statistics", "alumni"})
     private Player opponentPlayer1;
 
     @Column(name = "opponent_player1_name", length = 100)
@@ -85,15 +89,17 @@ public class Match {
 
     @ManyToOne
     @JoinColumn(name = "opponent_player2_id")
+    @JsonIgnoreProperties({"videoAnalyses", "skills", "statistics", "alumni"})
     private Player opponentPlayer2;
 
     @Column(name = "opponent_player2_name", length = 100)
     private String opponentPlayer2Name;
 
-    // Relationships
-    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL)
-    @JsonManagedReference("match-videos")
-    private List<VideoAnalysis> videos = new ArrayList<>();
+    // Relationship to Video (one match can have one video)
+    // When match is deleted, video is also deleted
+    @OneToOne(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("match-video")
+    private Video video;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -103,14 +109,18 @@ public class Match {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Helper methods
-    public void addVideo(VideoAnalysis video) {
-        videos.add(video);
-        video.setMatch(this);
+    // Helper methods for managing video
+    public void setVideo(Video video) {
+        this.video = video;
+        if (video != null) {
+            video.setMatch(this);
+        }
     }
 
-    public void removeVideo(VideoAnalysis video) {
-        videos.remove(video);
-        video.setMatch(null);
+    public void removeVideo() {
+        if (this.video != null) {
+            this.video.setMatch(null);
+            this.video = null;
+        }
     }
 }

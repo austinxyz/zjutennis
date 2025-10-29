@@ -98,6 +98,46 @@ class MatchService {
     const response = await axios.get(`${API_URL}/statistics`);
     return response.data;
   }
+
+  /**
+   * Attach video to match
+   * @param {number} matchId - Match ID
+   * @param {Object} videoData - Video data
+   * @returns {Promise<Object>} Created video object
+   */
+  async attachVideo(matchId, videoData) {
+    const response = await axios.post(`${API_URL}/${matchId}/video`, videoData);
+    return response.data;
+  }
+
+  /**
+   * Remove video from match
+   * @param {number} matchId - Match ID
+   * @returns {Promise<void>}
+   */
+  async removeVideo(matchId) {
+    await axios.delete(`${API_URL}/${matchId}/video`);
+  }
+
+  /**
+   * Get video for match
+   * @param {number} matchId - Match ID
+   * @returns {Promise<Object>} Video object
+   */
+  async getMatchVideo(matchId) {
+    const response = await axios.get(`${API_URL}/${matchId}/video`);
+    return response.data;
+  }
+
+  /**
+   * Check if match has video
+   * @param {number} matchId - Match ID
+   * @returns {Promise<boolean>} True if match has video
+   */
+  async hasVideo(matchId) {
+    const response = await axios.get(`${API_URL}/${matchId}/has-video`);
+    return response.data.hasVideo;
+  }
 }
 
 export default new MatchService();

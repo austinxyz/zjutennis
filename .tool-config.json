@@ -1,0 +1,34 @@
+{
+  "tools": {
+    "maven": {
+      "path": "/opt/homebrew/bin/mvn",
+      "home": "/opt/homebrew/Cellar/maven/3.9.11/libexec",
+      "version": "3.9.11"
+    },
+    "java": {
+      "path": "/opt/homebrew/Cellar/openjdk/25/bin/java",
+      "javac_path": "/opt/homebrew/Cellar/openjdk/25/bin/javac",
+      "home": "/opt/homebrew/Cellar/openjdk/25/libexec/openjdk.jdk/Contents/Home",
+      "version": "25"
+    },
+    "mysql": {
+      "path": "/opt/homebrew/opt/mysql-client/bin/mysql",
+      "client_home": "/opt/homebrew/opt/mysql-client",
+      "workbench": "mysqlworkbench"
+    },
+    "github": {
+      "path": "/opt/homebrew/bin/gh",
+      "cli": "gh"
+    }
+  },
+  "environment": {
+    "JAVA_HOME": "/opt/homebrew/Cellar/openjdk/25/libexec/openjdk.jdk/Contents/Home",
+    "MAVEN_HOME": "/opt/homebrew/Cellar/maven/3.9.11/libexec"
+  },
+  "notes": {
+    "created": "2025-10-28",
+    "platform": "macOS (Apple Silicon)",
+    "package_manager": "Homebrew",
+    "usage": "This file contains paths to installed development tools for the ZJU Tennis project"
+  }
+}

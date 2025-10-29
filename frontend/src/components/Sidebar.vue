@@ -42,14 +42,6 @@
       <div class="space-y-1">
         <div class="nav-section-title">Player Analysis</div>
         <router-link
-          to="/analysis/video"
-          class="nav-item"
-          :class="isActive('/analysis/video')"
-        >
-          <Video class="w-5 h-5" />
-          <span>Video Analysis</span>
-        </router-link>
-        <router-link
           to="/analysis/evaluation"
           class="nav-item"
           :class="isActive('/analysis/evaluation')"
@@ -80,6 +72,14 @@
         >
           <Brain class="w-5 h-5" />
           <span>Win Prediction</span>
+        </router-link>
+        <router-link
+          to="/analysis/video"
+          class="nav-item"
+          :class="isActive('/analysis/video')"
+        >
+          <Video class="w-5 h-5" />
+          <span>Video Analysis</span>
         </router-link>
       </div>
 
@@ -141,11 +141,11 @@ import { useRoute } from 'vue-router';
 import {
   LayoutDashboard,
   Users,
-  Video,
   MessageSquare,
   TrendingUp,
   Users2,
   Brain,
+  Video,
   Trophy,
   FileText,
   Calendar,

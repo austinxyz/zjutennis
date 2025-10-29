@@ -385,9 +385,9 @@
               </div>
             </div>
             <div class="flex gap-2">
-              <Button @click="goToPlayerVideos(selectedPlayer.id)" variant="outline" size="sm">
-                <Video class="h-4 w-4 mr-2" />
-                Videos
+              <Button @click="goToPlayerMatches(selectedPlayer)" variant="outline" size="sm">
+                <Trophy class="h-4 w-4 mr-2" />
+                Matches
               </Button>
               <Button @click="editPlayer(selectedPlayer.id)" size="sm">
                 <Pencil class="h-4 w-4 mr-2" />
@@ -533,8 +533,8 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { Plus, Pencil, ExternalLink, Search, ChevronDown, ChevronUp, Users, Save, X, Video } from 'lucide-vue-next';
+import { useRouter, useRoute } from 'vue-router';
+import { Plus, Pencil, Search, ChevronDown, ChevronUp, Users, Save, X, Trophy } from 'lucide-vue-next';
 import playerService from '../services/playerService';
 import Button from '../components/ui/Button.vue';
 import Card from '../components/ui/Card.vue';
@@ -554,6 +554,7 @@ import PlayerGoalsAvailability from '../components/PlayerGoalsAvailability.vue';
 import PlayerPreferences from '../components/PlayerPreferences.vue';
 
 const router = useRouter();
+const route = useRoute();
 const players = ref([]);
 const selectedPlayers = ref([]);
 const selectedPlayerId = ref(null);
@@ -791,8 +792,12 @@ const goToNewPlayer = () => {
   router.push('/players/new');
 };
 
-const goToPlayerVideos = (playerId) => {
-  router.push(`/players/${playerId}/videos`);
+const goToPlayerMatches = (player) => {
+  // Navigate to matches page with player name as query parameter
+  router.push({
+    path: '/matches',
+    query: { playerName: player.name }
+  });
 };
 
 const savePlayer = async () => {
@@ -908,6 +913,10 @@ const exportToCSV = () => {
 };
 
 onMounted(() => {
+  // Check if player name is passed via query parameter
+  if (route.query.name) {
+    simpleSearch.value = route.query.name;
+  }
   loadPlayers();
 });
 </script>
