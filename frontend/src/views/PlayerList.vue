@@ -362,7 +362,9 @@
                 <PlayerStatistics
                   v-if="activeTab === 'statistics'"
                   :statistics="editingStatistics"
+                  :player-id="selectedPlayerId"
                   @update:statistics="editingStatistics = $event"
+                  @refresh-player="refreshPlayerAfterUTRFetch"
                 />
               </div>
             </form>
@@ -836,6 +838,21 @@ const savePlayer = async () => {
 
 const cancelEdit = () => {
   editMode.value = false;
+};
+
+const refreshPlayerAfterUTRFetch = async () => {
+  try {
+    // Reload players to get the updated data from the database
+    await loadPlayers();
+
+    // Update the editing statistics with the fresh data from the database
+    const refreshedPlayer = players.value.find(p => p.id === selectedPlayerId.value);
+    if (refreshedPlayer && refreshedPlayer.statistics) {
+      editingStatistics.value = { ...refreshedPlayer.statistics };
+    }
+  } catch (err) {
+    console.error('Error refreshing player data:', err);
+  }
 };
 
 const clearSelection = () => {

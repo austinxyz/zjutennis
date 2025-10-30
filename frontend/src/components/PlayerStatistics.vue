@@ -149,7 +149,22 @@
 
     <!-- Match Statistics -->
     <div>
-      <h3 class="text-lg font-semibold text-foreground mb-4">Match Statistics</h3>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-foreground">Match Statistics</h3>
+        <Button
+          v-if="localStats.utrUrl && localStats.utrUrl.trim() !== ''"
+          @click="fetchFromUTR"
+          :disabled="fetchingUTR"
+          size="sm"
+          variant="outline"
+        >
+          <svg v-if="fetchingUTR" class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ fetchingUTR ? 'Fetching...' : 'Fetch from UTR' }}
+        </Button>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="space-y-2">
           <Label for="totalMatches">Total Matches</Label>
@@ -434,17 +449,70 @@ import { ref, watch } from 'vue';
 import Label from './ui/Label.vue';
 import Input from './ui/Input.vue';
 import Textarea from './ui/Textarea.vue';
+import Button from './ui/Button.vue';
+import axios from 'axios';
 
 const props = defineProps({
   statistics: {
     type: Object,
     required: true
+  },
+  playerId: {
+    type: Number,
+    required: true
   }
 });
 
-const emit = defineEmits(['update:statistics']);
+const emit = defineEmits(['update:statistics', 'refresh-player']);
 
 const localStats = ref({ ...props.statistics });
+const fetchingUTR = ref(false);
+
+// Fetch player statistics from UTR API
+const fetchFromUTR = async () => {
+  if (!localStats.value.utrUrl || localStats.value.utrUrl.trim() === '') {
+    alert('Doubles UTR URL is required');
+    return;
+  }
+
+  try {
+    fetchingUTR.value = true;
+
+    // Extract UTR ID from URL or use as is if it's just an ID
+    const utrId = localStats.value.utrUrl.trim();
+
+    // Call the backend API
+    const response = await axios.put(
+      `http://localhost:8080/api/players/${props.playerId}/statistics/utr`,
+      null,
+      {
+        params: { utrId }
+      }
+    );
+
+    // Update local statistics with the response
+    if (response.data) {
+      localStats.value.totalMatches = response.data.totalMatches;
+      localStats.value.wins = response.data.wins;
+      localStats.value.losses = response.data.losses;
+      // Keep win rate with 2 decimal points
+      localStats.value.winRate = response.data.winRate ? parseFloat(response.data.winRate.toFixed(2)) : 0;
+
+      // Emit the updated statistics
+      emit('update:statistics', localStats.value);
+
+      // Emit refresh event to reload player data from database
+      emit('refresh-player');
+
+      alert('Successfully fetched data from UTR!');
+    }
+  } catch (error) {
+    console.error('Error fetching UTR data:', error);
+    alert('Failed to fetch data from UTR: ' + (error.response?.data?.message || error.message));
+  } finally {
+    fetchingUTR.value = false;
+  }
+};
 
 // Format date to readable string (date only, no time)
 const formatDate = (dateString) => {

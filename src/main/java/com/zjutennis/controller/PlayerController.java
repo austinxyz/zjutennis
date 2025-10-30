@@ -5,8 +5,10 @@ import com.zjutennis.dto.PlayerSearchRequest;
 import com.zjutennis.dto.PlayerSearchResponse;
 import com.zjutennis.model.Player;
 import com.zjutennis.model.PlayerSkillsHistory;
+import com.zjutennis.model.PlayerStatistics;
 import com.zjutennis.service.PlayerService;
 import com.zjutennis.service.PlayerSkillsHistoryService;
+import com.zjutennis.service.PlayerStatisticsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,9 @@ public class PlayerController {
 
     @Autowired
     private PlayerSkillsHistoryService playerSkillsHistoryService;
+
+    @Autowired
+    private PlayerStatisticsService playerStatisticsService;
 
     @GetMapping
     public ResponseEntity<List<Player>> getAllPlayers() {
@@ -111,6 +116,31 @@ public class PlayerController {
             log.error("Error importing players from CSV", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ImportResult(0, 0, "Import failed: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Update player statistics from UTR API
+     * PUT /api/players/{id}/statistics/utr?utrId={utrId}
+     *
+     * @param id The player ID
+     * @param utrId The UTR ID (can be just the ID like "3790509" or a full URL)
+     * @return Updated PlayerStatistics
+     */
+    @PutMapping("/{id}/statistics/utr")
+    public ResponseEntity<PlayerStatistics> updatePlayerStatisticsFromUTR(
+            @PathVariable Long id,
+            @RequestParam String utrId) {
+        log.info("PUT /api/players/{}/statistics/utr - Updating statistics from UTR with utrId: {}", id, utrId);
+        try {
+            PlayerStatistics updatedStatistics = playerStatisticsService.updateFromUTR(id, utrId);
+            return ResponseEntity.ok(updatedStatistics);
+        } catch (RuntimeException e) {
+            log.error("Error updating player statistics from UTR for player id: {}", id, e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (Exception e) {
+            log.error("Unexpected error updating player statistics from UTR for player id: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
